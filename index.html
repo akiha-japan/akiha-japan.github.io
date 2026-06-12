@@ -170,7 +170,8 @@ footer{
 
   
 <script>
-// 【永久確定版】CSVから抽出した全79本分の動画IDフルリスト
+// 【修正版】79本ランダム再生・安全版
+
 const videos = [
   "V6vJ9jDvYgQ", "DWPVW_WUwoE", "wavyyVpParE", "CbhoPZ_DWsg", "uPB_sHxVZLw",
   "NqI5K-R6-jA", "K82EaD7yvYw", "WunP9D_uMv8", "N7tW5o7_9L0", "p29t_q8C0Z0",
@@ -186,11 +187,36 @@ const videos = [
   "0PWiUqKpZoE", "QeMAEBMW7ps"
 ];
 
-// ページを開くたびに、配列の中から完全にランダムで1本選ぶ
-const pick = videos[Math.floor(Math.random() * videos.length)];
+// 重複削除（安全対策）
+const uniqueVideos = [...new Set(videos)];
 
-// 選択された動画IDを埋め込みプレイヤーにセットして再生
-document.getElementById("yt").src = "https://www.youtube.com/embed/" + pick;
+// ランダム取得（前回と同じ動画を避ける）
+let lastVideo = null;
+
+function getRandomVideo() {
+  let pick;
+
+  do {
+    pick = uniqueVideos[Math.floor(Math.random() * uniqueVideos.length)];
+  } while (uniqueVideos.length > 1 && pick === lastVideo);
+
+  lastVideo = pick;
+  return pick;
+}
+
+// iframeに反映
+const yt = document.getElementById("yt");
+
+if (yt) {
+  yt.src = "https://www.youtube.com/embed/" + getRandomVideo();
+}
+
+// 次の動画を呼び出す関数（ボタン用）
+function nextVideo() {
+  if (yt) {
+    yt.src = "https://www.youtube.com/embed/" + getRandomVideo();
+  }
+}
 </script>
 
 
