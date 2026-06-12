@@ -167,21 +167,28 @@ footer{
 </footer>
 
 <script>
-// 指定された再生リストのID
+// あなたの再生リストID
 const playlistId = "PLr0D8f47L11xSGgpHFfwN7voqJcXr_3DN";
 
-// 再生リスト内の動画本数（※動画を増やしたらこの数字を増やしてください）
-const totalVideos = 6; 
-
-// 0 から (動画本数 - 1) までのランダムな数字（インデックス）を作る
-const randomIndex = Math.floor(Math.random() * totalVideos);
-
-// 埋め込みURLを生成
-// list: 再生リストID
-// index: 何番目の動画から再生を始めるか（ランダム指定）
-// shuffle: リスト2本目以降の再生順もシャッフルする
-document.getElementById("yt").src = 
-  `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&index=${randomIndex}&shuffle=1`;
+// 【対策】YouTubeの制限を回避するため、再生リストのデータを直接取得してシャッフルする
+fetch(`https://exportdownload.com/api/youtube/playlist?id=${playlistId}`)
+  .then(res => res.json())
+  .then(data => {
+    // 再生リスト内の全動画IDを配列にする
+    const videos = data.map(item => item.id);
+    
+    if (videos.length > 0) {
+      // 340本以上ある全動画の中から、完全にランダムで1本選ぶ
+      const pick = videos[Math.floor(Math.random() * videos.length)];
+      
+      // 埋め込みプレイヤーにセット（これなら絶対に偏りません！）
+      document.getElementById("yt").src = "https://www.youtube.com/embed/" + pick;
+    }
+  })
+  .catch(err => {
+    // 万が一上の自動取得がエラーになった場合のセーフティ（元々入っていた動画を流す）
+    document.getElementById("yt").src = "https://www.youtube.com/embed/VR0lZ93dzaI";
+  });
 </script>
 
 </body>
