@@ -167,17 +167,21 @@ footer{
 </footer>
 
 <script>
-// 複数動画ID（ここ増やせば増やすほど“更新っぽくなる”）
-const videos = [
-  "VR0lZ93dzaI"
-];
+// 指定された再生リストのID
+const playlistId = "PLr0D8f47L11xSGgpHFfwN7voqJcXr_3DN";
 
-// ランダムで1本選ぶ
-const pick = videos[Math.floor(Math.random() * videos.length)];
+// 再生リスト内の動画本数（※動画を増やしたらこの数字を増やしてください）
+const totalVideos = 6; 
 
-// 埋め込み
-document.getElementById("yt").src =
-  "https://www.youtube.com/embed/" + pick;
+// 0 から (動画本数 - 1) までのランダムな数字（インデックス）を作る
+const randomIndex = Math.floor(Math.random() * totalVideos);
+
+// 埋め込みURLを生成
+// list: 再生リストID
+// index: 何番目の動画から再生を始めるか（ランダム指定）
+// shuffle: リスト2本目以降の再生順もシャッフルする
+document.getElementById("yt").src = 
+  `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&index=${randomIndex}&shuffle=1`;
 </script>
 
 </body>
