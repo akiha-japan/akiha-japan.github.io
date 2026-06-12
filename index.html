@@ -27,15 +27,14 @@ header{
   margin-bottom:15px;
 }
 
-header h1{
+h1{
   font-size:52px;
   margin:0;
   color:#38bdf8;
 }
 
-header p{
+p{
   color:#cbd5e1;
-  margin-top:10px;
 }
 
 .sns{
@@ -78,7 +77,6 @@ header p{
 
 .title{
   font-size:20px;
-  margin-bottom:6px;
 }
 
 .desc{
@@ -87,15 +85,15 @@ header p{
 }
 
 /* YouTube枠 */
-.video-box{
+.youtube{
   margin-top:40px;
   background:#111827;
+  border:1px solid #1f2937;
   padding:15px;
   border-radius:12px;
-  border:1px solid #1f2937;
 }
 
-.video-title{
+.youtube-title{
   font-size:16px;
   margin-bottom:10px;
   color:#38bdf8;
@@ -121,18 +119,15 @@ footer{
 <body>
 
 <header>
-
   <img src="logo.png" class="logo" alt="logo">
-
   <h1>akiha</h1>
   <p>Tools / Games / Projects</p>
 
   <div class="sns">
-    <a href="https://x.com/aki20240628" target="_blank">𝕏 X</a>
-    <a href="https://www.youtube.com/@akiha2026" target="_blank">▶ YouTube</a>
-    <a href="https://note.com/aki20240628" target="_blank">📝 note</a>
+    <a href="https://x.com/aki20240628" target="_blank">X</a>
+    <a href="https://www.youtube.com/@akiha2026" target="_blank">YouTube</a>
+    <a href="https://note.com/aki20240628" target="_blank">note</a>
   </div>
-
 </header>
 
 <div class="container">
@@ -147,12 +142,12 @@ footer{
     <div class="desc">シューティングゲーム</div>
   </a>
 
-  <!-- YouTube最新動画 -->
-  <div class="video-box">
-    <div class="video-title">📺 最新動画</div>
+  <!-- YouTube（確実に動く版） -->
+  <div class="youtube">
+    <div class="youtube-title">📺 最新動画</div>
 
     <iframe
-      src="https://www.youtube.com/embed?listType=user_uploads&list=akiha2026"
+      src="https://www.youtube.com/embed?listType=search&list=akiha2026"
       allowfullscreen>
     </iframe>
 
