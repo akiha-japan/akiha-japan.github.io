@@ -2,7 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AKIHA JAPAN</title>
+
   <style>
     body {
       margin: 0;
@@ -18,13 +20,14 @@
 
     header h1 {
       margin: 0;
-      font-size: 34px;
+      font-size: 36px;
       letter-spacing: 2px;
     }
 
     header p {
       color: #94a3b8;
       margin-top: 10px;
+      font-size: 14px;
     }
 
     .container {
@@ -33,10 +36,16 @@
       padding: 20px;
     }
 
+    .section {
+      margin-top: 30px;
+    }
+
     .section-title {
-      margin: 30px 0 10px;
-      font-size: 18px;
+      font-size: 16px;
       color: #cbd5e1;
+      margin-bottom: 10px;
+      border-left: 3px solid #38bdf8;
+      padding-left: 10px;
     }
 
     .card {
@@ -53,7 +62,7 @@
 
     .card:hover {
       background: #1f2937;
-      transform: scale(1.01);
+      transform: translateY(-2px);
     }
 
     .title {
@@ -72,6 +81,15 @@
       font-size: 12px;
       padding: 40px 10px;
     }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 28px;
+      }
+      .card {
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 
@@ -84,19 +102,23 @@
 
 <div class="container">
 
-  <div class="section-title">📊 Tools</div>
+  <div class="section">
+    <div class="section-title">📊 Tools</div>
 
-  <a class="card" href="/tool/simulator.html">
-    <div class="title">YouTube収益シミュレーター</div>
-    <div class="desc">再生回数・単価・スパチャで収益計算</div>
-  </a>
+    <a class="card" href="/tool/simulator.html">
+      <div class="title">YouTube収益シミュレーター</div>
+      <div class="desc">再生回数・単価・スパチャで収益計算</div>
+    </a>
+  </div>
 
-  <div class="section-title">🎮 Games</div>
+  <div class="section">
+    <div class="section-title">🎮 Games</div>
 
-  <a class="card" href="/game/invader.html">
-    <div class="title">SPACE INVADERS</div>
-    <div class="desc">シンプルシューティングゲーム</div>
-  </a>
+    <a class="card" href="/game/invader.html">
+      <div class="title">SPACE INVADERS</div>
+      <div class="desc">シンプルシューティングゲーム</div>
+    </a>
+  </div>
 
 </div>
 
