@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 シューティングゲーム🛵 SPACE HONGDARS 🏍️</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    h1 { margin-top: 15px; font-size: 1.4rem; color: #00ff00; margin-bottom: 5px; }
+    
+    .status-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    #stage-board { color: #00ffff; }
+    #score-board { color: #ffffff; }
+    #ammo-board { color: #ff9900; }
+    #life-board { color: #ff3366; }
+
+    #gameCanvas {
+      background: #000;
+      border: 4px solid #333;
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+
+    /* 押しやすさを最優先した操作ボタンの配置 */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    .btn {
+      width: 75px;
+      height: 65px;
+      background: #333;
+      border: 2px solid #555;
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border-radius: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn:active { background: #555; }
+    #btn-fire { background: #cc0000; border-color: #ff3333; width: 110px; }
+    #btn-fire:active { background: #ff0000; }
+
+    /* 一番下に引っ越した説明文ボックス */
+    .game-instructions {
+      max-width: 400px;
+      margin: 15px auto 25px auto;
+      text-align: left;
+      background: #222;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+    .game-instructions p { margin: 4px 0; }
+    .highlight-text { color: #00ff00; font-weight: bold; }
+    .info { color: #888; font-size: 0.85rem; margin-top: 5px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <h1>🚀 シューティングゲーム🛵 SPACE HONGDARS 🏍️</h1>
+  
+  <div class="status-container">
+    <div id="stage-board">STAGE: <span id="stage">1</span></div>
+    <div id="score-board">SCORE: <span id="score">0</span></div>
+    <div id="ammo-board">残り手数: <span id="ammo">100</span></div>
+    <div id="life-board">LIFE: <span id="life">❤️❤️❤️</span></div>
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <div class="controls">
+    <button class="btn" id="btn-left">◀</button>
+    <button class="btn" id="btn-fire">FIRE</button>
+    <button class="btn" id="btn-right">▶</button>
+  </div>
+
+  <div class="game-instructions">
+    <p><span class="highlight-text">【作戦指令】</span> 迫り来る 🐙 🐜 🏍️ を全滅させよ！</p>
+    <p><span class="highlight-text">【獲得得点】</span> 🐙 : 30pts / 🐜 : 20pts / 🏍️ : 10pts / 🛸 : 100pts</p>
+    <p><span class="highlight-text">【防衛ライン】</span> 画面下の<span style="color:#ff3333; font-weight:bold;">赤い点線</span>を越えられたら即敗北！</p>
+    <p><span class="highlight-text">【特殊補給】</span> 敵を倒すと稀に出現する ⚡ を取ると3連射に強化！</p>
+    <p class="info">PC操作: 左右矢印キー [←][→] で移動 / [スペースキー] で攻撃</p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const ammoEl = document.getElementById("ammo");
+    const stageEl = document.getElementById("stage");
+    const lifeEl = document.getElementById("life");
+    const stageBoardEl = document.getElementById("stage-board");
+    
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    let score = 0;
+    let ammo = 100; 
+    let stage = 1;
+    let lives = 3; 
+    let gameOver = false;
+    let gameClear = false;
+    let invulnerableTimer = 0; 
+
+    const player = { x: 180, y: 360, width: 30, height: 20, speed: 6, mode: 'single' };
+    const deadLineY = 350; 
+
+    let bullets = [];
+    let invaders = [];
+    let particles = [];
+    let stars = [];
+    let enemyBullets = [];
+    let ufo = null;
+    let powerup = null;
+
+    let invaderDirection = 1;
+    let baseSpeed = 0.5;
+
+    function playSound(freq, type, dur) {
+      try {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.type = type;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    function updateStageDisplay() {
+      if (stage === 3) {
+        stageBoardEl.innerHTML = "<span style='color:#ff3333;'>LAST STAGE</span>";
+      } else {
+        stageBoardEl.innerHTML = "STAGE: <span id='stage'>" + stage + "</span>";
+      }
+    }
+
+    function initLevel() {
+      invaders = [];
+      bullets = [];
+      enemyBullets = [];
+      ufo = null;
+      powerup = null;
+      invaderDirection = 1;
+      player.mode = 'single'; 
+
+      updateStageDisplay();
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 6; c++) {
+          let type = "bike";
+          if (r === 0) type = "tako";
+          if (r === 1) type = "ari";
+
+          invaders.push({
+            x: 40 + c * 50,
+            y: 40 + r * 40,
+            width: 30,
+            height: 25,
+            type: type,
+            alive: true
+          });
+        }
+      }
+    }
+
+    for(let i=0; i<40; i++) {
+      stars.push({ x: Math.random()*400, y: Math.random()*400, speed: Math.random()*1.5 + 0.5 });
+    }
+
+    let rightPressed = false;
+    let leftPressed = false;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") rightPressed = true;
+      if (e.key === "ArrowLeft") leftPressed = true;
+      if (e.key === " " || e.key === "Spacebar") {
+        fireBullet();
+        e.preventDefault();
+      }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowRight") rightPressed = false;
+      if (e.key === "ArrowLeft") leftPressed = false;
+    });
+
+    document.getElementById("btn-left").addEventListener("pointerdown", () => leftPressed = true);
+    document.getElementById("btn-left").addEventListener("pointerup", () => leftPressed = false);
+    document.getElementById("btn-right").addEventListener("pointerdown", () => rightPressed = true);
+    document.getElementById("btn-right").addEventListener("pointerup", () => rightPressed = false);
+    document.getElementById("btn-fire").addEventListener("pointerdown", fireBullet);
+
+    function fireBullet() {
+      if (gameOver || gameClear) return;
+      if (ammo <= 0) return;
+
+      if (bullets.length < 5) {
+        if (player.mode === 'wide') {
+          bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 7, vx: -1.5 });
+          bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 7, vx: 0 });
+          bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 7, vx: 1.5 });
+        } else {
+          bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 7, vx: 0 });
+        }
+        
+        ammo--; 
+        ammoEl.textContent = ammo;
+        playSound(300, 'square', 0.08);
+
+        if (ammo <= 0 && bullets.length === 0) {
+          gameOver = true;
+        }
+      }
+    }
+
+    function playerHit() {
+      if (invulnerableTimer > 0) return; 
+
+      lives--;
+      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+
+      if (lives <= 0) {
+        gameOver = true;
+        playSound(100, 'sawtooth', 0.6);
+      } else {
+        invulnerableTimer = 60; 
+        playSound(150, 'sine', 0.3);
+        for(let k=0; k<10; k++) {
+          particles.push({ x: player.x + 15, y: player.y + 10, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: "#00ffff" });
+        }
+      }
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      update();
+      draw();
+
+      if (!gameOver && !gameClear) {
+        requestAnimationFrame(gameLoop);
+      } else if (gameClear) {
+        ctx.fillStyle = "#00ff00";
+        ctx.font = "30px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("ALL STAGE CLEAR!", 200, 180);
+        ctx.fillStyle = "#fff";
+        ctx.font = "16px sans-serif";
+        // ★ご指定の文言へ変更
+        ctx.fillText("ホングダーから地球の平和は守られた！", 200, 230);
+      } else {
+        ctx.fillStyle = "red";
+        ctx.font = "30px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", 200, 200);
+        ctx.fillStyle = "#fff";
+        ctx.font = "16px sans-serif";
+        ctx.fillText("リロードして再挑戦", 200, 240);
+      }
+    }
+
+    function update() {
+      if (gameOver || gameClear) return;
+
+      if (invulnerableTimer > 0) invulnerableTimer--;
+
+      stars.forEach(st => {
+        st.y += st.speed;
+        if(st.y > 400) st.y = 0;
+      });
+
+      if(!ufo && Math.random() < 0.003) {
+        ufo = { x: -30, y: 15, width: 30, height: 20, speed: 1.5 };
+      }
+      if(ufo) {
+        ufo.x += ufo.speed;
+        if(ufo.x > 400) ufo = null;
+      }
+
+      if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
+      if (leftPressed && player.x > 0) player.x -= player.speed;
+
+      bullets.forEach((b, index) => {
+        b.y -= b.speed;
+        b.x += b.vx;
+        if (b.y < 0 || b.x < 0 || b.x > 400) {
+          bullets.splice(index, 1);
+        }
+      });
+
+      let shiftDown = false;
+      let currentSpeed = (baseSpeed + (stage - 1) * 0.15) * invaderDirection;
+
+      invaders.forEach(inv => {
+        if (!inv.alive) return;
+        inv.x += currentSpeed;
+        
+        if (inv.x > canvas.width - inv.width || inv.x < 0) {
+          shiftDown = true;
+        }
+        if (inv.y + inv.height >= deadLineY) {
+          gameOver = true; 
+        }
+      });
+
+      if (shiftDown) {
+        invaderDirection *= -1;
+        invaders.forEach(inv => {
+          if (inv.alive) inv.y += 12; 
+        });
+      }
+
+      invaders.forEach(inv => {
+        if (inv.alive && Math.random() < 0.0004 * stage) {
+          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.3 + stage*0.2, r: 5 });
+        }
+      });
+      if (ufo && Math.random() < 0.01) {
+        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3, r: 5 });
+      }
+
+      enemyBullets.forEach((eb, index) => {
+        eb.y += eb.speed;
+        if (eb.y > 400) enemyBullets.splice(index, 1);
+
+        if (eb.x + eb.r > player.x && eb.x - eb.r < player.x + player.width && 
+            eb.y + eb.r > player.y && eb.y - eb.r < player.y + player.height) {
+          enemyBullets.splice(index, 1);
+          playerHit();
+        }
+      });
+
+      if(powerup) {
+        powerup.y += 1.5;
+        if(powerup.y > 400) powerup = null;
+        else if(powerup.x > player.x && powerup.x < player.x + player.width && powerup.y > player.y && powerup.y < player.y + player.height) {
+          player.mode = 'wide'; 
+          powerup = null;
+          playSound(600, 'sine', 0.15);
+        }
+      }
+
+      particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        if(p.life <= 0) particles.splice(index, 1);
+      });
+
+      bullets.forEach((b, bIdx) => {
+        invaders.forEach((inv) => {
+          if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
+            inv.alive = false;
+            bullets.splice(bIdx, 1);
+            
+            if (inv.type === "tako") score += 30;
+            else if (inv.type === "ari") score += 20;
+            else score += 10;
+            
+            scoreEl.textContent = score;
+            playSound(150, 'sawtooth', 0.05);
+
+            for(let k=0; k<6; k++) {
+              particles.push({
+                x: inv.x + inv.width/2,
+                y: inv.y + inv.height/2,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 15,
+                color: "#ff9900"
+              });
+            }
+
+            if(Math.random() < 0.15 && !powerup) {
+              powerup = { x: inv.x + inv.width/2, y: inv.y };
+            }
+            
+            if (invaders.every(i => !i.alive)) {
+              if(stage === 3) { 
+                gameClear = true;
+              } else {
+                stage++;
+                initLevel();
+              }
+            }
+          }
+        });
+
+        if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
+          ufo = null;
+          bullets.splice(bIdx, 1);
+          score += 100;
+          scoreEl.textContent = score;
+          playSound(500, 'sine', 0.2);
+          for(let k=0; k<10; k++) {
+            particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 20, color: "#ff9900" });
+          }
+        }
+      });
+
+      if (ammo <= 0 && bullets.length === 0 && !gameClear) {
+        gameOver = true;
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = "#ffffff";
+      stars.forEach(st => {
+        ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8);
+      });
+
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]); 
+      ctx.beginPath();
+      ctx.moveTo(0, deadLineY);
+      ctx.lineTo(400, deadLineY);
+      ctx.stroke();
+      ctx.setLineDash([]); 
+
+      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
+        ctx.fillStyle = "#00ff00";
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+
+      ctx.fillStyle = "#ffff00";
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      enemyBullets.forEach(eb => {
+        ctx.beginPath();
+        ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff3333";
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = "#ff0000";
+        ctx.fill();
+        ctx.shadowBlur = 0; 
+      });
+
+      particles.forEach(p => {
+        ctx.fillStyle = p.color || "#ff9900";
+        ctx.fillRect(p.x, p.y, 2, 2);
+      });
+
+      if(powerup) {
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("⚡", powerup.x, powerup.y);
+      }
+
+      if(ufo) {
+        ctx.font = "24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🛸", ufo.x + ufo.width/2, ufo.y);
+      }
+
+      invaders.forEach(inv => {
+        if (inv.alive) {
+          ctx.font = "24px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          
+          if (inv.type === "tako") {
+            ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
+          } else if (inv.type === "ari") {
+            ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
+          } else {
+            ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
+          }
+        }
+      });
+    }
+
+    initLevel();
+    gameLoop();
+  </script>
+</body>
+</html>
