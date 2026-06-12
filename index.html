@@ -13,6 +13,7 @@ body{
   color:#fff;
 }
 
+/* ヘッダー */
 header{
   text-align:center;
   padding:40px 20px 20px;
@@ -37,6 +38,7 @@ p{
   color:#cbd5e1;
 }
 
+/* SNS */
 .sns{
   text-align:center;
   margin-top:15px;
@@ -54,12 +56,14 @@ p{
   font-size:13px;
 }
 
+/* コンテンツ */
 .container{
   max-width:900px;
   margin:0 auto;
   padding:20px;
 }
 
+/* カード */
 .card{
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.1);
@@ -71,10 +75,7 @@ p{
   display:block;
 }
 
-.card:hover{
-  border-color:#38bdf8;
-}
-
+/* YouTube */
 .youtube{
   margin-top:40px;
   background:#111827;
@@ -89,13 +90,25 @@ p{
   margin-bottom:10px;
 }
 
-iframe{
+/* ★16:9固定 */
+.video-wrap{
+  position:relative;
   width:100%;
-  height:400px;
-  border:none;
+  aspect-ratio:16/9;
   border-radius:10px;
+  overflow:hidden;
 }
 
+iframe{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+/* フッター */
 footer{
   text-align:center;
   padding:40px 10px;
@@ -109,7 +122,9 @@ footer{
 <body>
 
 <header>
+
   <img src="logo.png" class="logo" alt="logo">
+
   <h1>akiha</h1>
   <p>Tools / Games / Projects</p>
 
@@ -118,6 +133,7 @@ footer{
     <a href="https://www.youtube.com/@akiha2026" target="_blank">YouTube</a>
     <a href="https://note.com/aki20240628" target="_blank">note</a>
   </div>
+
 </header>
 
 <div class="container">
@@ -132,14 +148,15 @@ footer{
     <div class="desc">シューティングゲーム</div>
   </a>
 
-  <!-- YouTube（単体動画） -->
+  <!-- YouTubeランダム表示 -->
   <div class="youtube">
-    <h2>📺 お勧め動画</h2>
+    <h2>📺 ランダム動画</h2>
 
-    <iframe
-      src="https://www.youtube.com/watch?v=8H5InfX1GCQ"
-      allowfullscreen>
-    </iframe>
+    <div class="video-wrap">
+      <iframe id="yt"
+        allowfullscreen>
+      </iframe>
+    </div>
 
   </div>
 
@@ -148,6 +165,20 @@ footer{
 <footer>
   © akiha
 </footer>
+
+<script>
+// 複数動画ID（ここ増やせば増やすほど“更新っぽくなる”）
+const videos = [
+  "VR0lZ93dzaI"
+];
+
+// ランダムで1本選ぶ
+const pick = videos[Math.floor(Math.random() * videos.length)];
+
+// 埋め込み
+document.getElementById("yt").src =
+  "https://www.youtube.com/embed/" + pick;
+</script>
 
 </body>
 </html>
