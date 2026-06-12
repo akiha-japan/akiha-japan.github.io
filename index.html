@@ -5,32 +5,68 @@
   <title>AKIHA JAPAN</title>
   <style>
     body {
-      font-family: sans-serif;
-      text-align: center;
       margin: 0;
-      padding: 50px;
-      background: #f5f5f5;
+      font-family: sans-serif;
+      background: #0f172a;
+      color: #fff;
     }
-    h1 {
-      font-size: 32px;
+
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 28px;
+      font-weight: bold;
     }
-    a {
-      display: block;
-      margin: 10px;
-      font-size: 18px;
-      color: #0066cc;
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
       text-decoration: none;
+      color: white;
+      display: block;
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      background: #334155;
+    }
+
+    .title {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .desc {
+      font-size: 13px;
+      color: #cbd5e1;
     }
   </style>
 </head>
 <body>
 
-  <h1>AKIHA JAPAN</h1>
+<header>AKIHA JAPAN</header>
 
-  <p>ツール一覧</p>
+<div class="container">
 
-  <a href="/tool/simulator.html">📊 YouTube収益シミュレーター</a>
-  <a href="/game/invader.html">🚀 SPACE INVADERS</a>
+  <a class="card" href="/tool/simulator.html">
+    <div class="title">📊 YouTube収益シミュレーター</div>
+    <div class="desc">再生回数と単価で収益計算</div>
+  </a>
+
+  <a class="card" href="/game/invader.html">
+    <div class="title">🚀 シューティングゲーム🛵 SPACE HONGDARS 🏍️</div>
+    <div class="desc">シンプルなシューティングゲーム</div>
+  </a>
+
+</div>
 
 </body>
 </html>
