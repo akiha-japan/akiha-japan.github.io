@@ -7,66 +7,102 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #0f172a;
+      background: #0b1220;
       color: #fff;
     }
 
     header {
       text-align: center;
-      padding: 40px 20px;
-      font-size: 28px;
-      font-weight: bold;
+      padding: 50px 20px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: 2px;
+    }
+
+    header p {
+      color: #94a3b8;
+      margin-top: 10px;
     }
 
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
 
+    .section-title {
+      margin: 30px 0 10px;
+      font-size: 18px;
+      color: #cbd5e1;
+    }
+
     .card {
-      background: #1e293b;
-      padding: 20px;
-      margin: 15px 0;
-      border-radius: 10px;
+      background: #111827;
+      padding: 18px;
+      margin: 12px 0;
+      border-radius: 12px;
       text-decoration: none;
       color: white;
       display: block;
       transition: 0.2s;
+      border: 1px solid #1f2937;
     }
 
     .card:hover {
-      background: #334155;
+      background: #1f2937;
+      transform: scale(1.01);
     }
 
     .title {
-      font-size: 18px;
-      margin-bottom: 5px;
+      font-size: 17px;
+      margin-bottom: 6px;
     }
 
     .desc {
       font-size: 13px;
-      color: #cbd5e1;
+      color: #94a3b8;
+    }
+
+    footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding: 40px 10px;
     }
   </style>
 </head>
+
 <body>
 
-<header>AKIHA JAPAN</header>
+<header>
+  <h1>AKIHA JAPAN</h1>
+  <p>Tools / Games / Projects</p>
+</header>
 
 <div class="container">
 
+  <div class="section-title">📊 Tools</div>
+
   <a class="card" href="/tool/simulator.html">
-    <div class="title">📊 YouTube収益シミュレーター</div>
-    <div class="desc">再生回数と単価で収益計算</div>
+    <div class="title">YouTube収益シミュレーター</div>
+    <div class="desc">再生回数・単価・スパチャで収益計算</div>
   </a>
 
+  <div class="section-title">🎮 Games</div>
+
   <a class="card" href="/game/invader.html">
-    <div class="title">🚀 シューティングゲーム🛵 SPACE HONGDARS 🏍️</div>
-    <div class="desc">シンプルなシューティングゲーム</div>
+    <div class="title">SPACE INVADERS</div>
+    <div class="desc">シンプルシューティングゲーム</div>
   </a>
 
 </div>
+
+<footer>
+  © AKIHA JAPAN
+</footer>
 
 </body>
 </html>
