@@ -90,7 +90,7 @@ p{
   margin-bottom:10px;
 }
 
-/* ★16:9固定 */
+/* 16:9 */
 .video-wrap{
   position:relative;
   width:100%;
@@ -132,6 +132,9 @@ footer{
     <a href="https://x.com/aki20240628" target="_blank">X</a>
     <a href="https://www.youtube.com/@akiha2026" target="_blank">YouTube</a>
     <a href="https://note.com/aki20240628" target="_blank">note</a>
+
+    <!-- 追加 -->
+    <a href="/tool/xsearch.html" target="_blank">X検索</a>
   </div>
 
 </header>
@@ -150,14 +153,11 @@ footer{
 
   <!-- YouTubeランダム表示 -->
   <div class="youtube">
-    <h2>📺 ランダム🎵 The music video AI　動画</h2>
+    <h2>📺 ランダム🎵 The music video AI 動画</h2>
 
     <div class="video-wrap">
-      <iframe id="yt"
-        allowfullscreen>
-      </iframe>
+      <iframe id="yt" allowfullscreen></iframe>
     </div>
-
   </div>
 
 </div>
@@ -166,46 +166,37 @@ footer{
   © akiha
 </footer>
 
-
-
-  
 <script>
-// 【完全確定版】CSVから厳密にプログラム抽出した、実在する全114本の本物動画IDリスト
 const videos = [
-  "V6vJ9jDvYgQ", "DWPVW_WUwoE", "wavyyVpParE", "CbhoPZ_DWsg", "uPB_sHxVZLw",
-  "5jeHPjmL_Kw", "Stmkos91qdQ", "aHjGRFzvdjE", "XcZierhguIw", "x38r3KHGBWI",
-  "bCjPwBSJVlI", "m28DvWQnPcM", "hfFoIrhUJVk", "m38G_BIC2WM", "5hdEPAL2jGM",
-  "TEz2IzTZO5I", "TJrQ4CwX5J8", "mSjz4ALo6zE", "ZQxRDLNbRpA", "-CRSb0KX9Ys",
-  "ztk6o0jPcak", "wFzRAg66jl8", "zXEUHBArulA", "O_l5_EDb35A", "PzlrXGiDlQ8",
-  "qdK1Zl871a4", "_Pfr1rN8qJ0", "qCOmKT1Mvr4", "zqlGr2xqGzg", "ASsM9_IXc84",
-  "sgP8gYBPmAk", "vdhRSIrLQaQ", "JG_B7USeKlc", "VR0lZ93dzaI", "d0_0jeC1bl8",
-  "6irertfRGFs", "ap-eWRz4ZY4", "ZDeHFqXm6Os", "AcK7ox-0yWo", "BNcfyAg5iQc",
-  "cDYLd0vYgOg", "bptqLOop8Yg", "H4fw25AhB18", "u0jCqA0sARs", "kkjE4skEzvY",
-  "7z_c9eAvs9o", "gMykwdFqQSM", "RMWFSB4aiDE", "t01rtzvtc64", "hmTabsZXQLY",
-  "EiFLwbqDwN0", "MtBQDijzysw", "Gkk-QAPjFng", "3WVh7SXtv8o", "oEXsR0W3j_k",
-  "x6a_hYZgOIA", "c3wZicSMh3Y", "dvdBn6ifzlw", "lY8Nc-ZBEO4", "MCwkzyt54Rs",
-  "ZP_4ctWpcOM", "8H5InfX1GCQ", "8l8sB9f0V0A", "SLpy4zt41D0", "bUReM4dRlB0",
-  "-J3QDfKfnk8", "q5VJJgscyKk", "hYqoIAJqPNc", "-jvpgXWFXGQ", "wmiEfMkmwGQ",
-  "J9WqDCpY8dI", "AKLBEbH8oSA", "CPm0fpbkEbI", "L-eeJtq00qA", "UrKdc_ddQUM",
-  "rpEAg662WlU", "tP8w2A3_g8c", "cR7XTj7g_f4", "FneaAfgP8BU", "VGMEDHIem88",
-  "dgzaD_j-pJ4", "_OLhrNH-Uy0", "fkQKknRj9l8", "Hs0sEjG99gU", "9V_UZ66YUfk",
-  "2RWPE9gry-g", "Ag-nG72Y6SY", "U6v0I9R9fvU", "Du2_mT-TEUg", "VPirDNqzbdU",
-  "kvnG4CldEho", "_GYvsKOsKAw", "H00_jnJViBA", "gHLhzVaDuIU", "8sr7SDwKiuQ",
-  "PbMDB-JcblY", "3WJOjCHJ7U0", "CdJn4Lb1t5I", "Mmfbmfidcps", "vNNqzq3Ngfs",
-  "kg-JDpBhQcc", "lbl0OnhDiVI", "-BoY9VH1ahY", "qOHfPaF6qJI", "WmpGQtDLWgM",
-  "m6SJCEZIB78", "lpZ4sseKRA8", "rdXS736hZLM", "LsQcM4iTYTg", "jq7tsCxnzBs",
-  "izCaMqqCyMQ", "ddogJuoALGA", "kHaWTZW2NDY", "32jzSISgYt4"
+  "V6vJ9jDvYgQ","DWPVW_WUwoE","wavyyVpParE","CbhoPZ_DWsg","uPB_sHxVZLw",
+  "5jeHPjmL_Kw","Stmkos91qdQ","aHjGRFzvdjE","XcZierhguIw","x38r3KHGBWI",
+  "bCjPwBSJVlI","m28DvWQnPcM","hfFoIrhUJVk","m38G_BIC2WM","5hdEPAL2jGM",
+  "TEz2IzTZO5I","TJrQ4CwX5J8","mSjz4ALo6zE","ZQxRDLNbRpA","-CRSb0KX9Ys",
+  "ztk6o0jPcak","wFzRAg66jl8","zXEUHBArulA","O_l5_EDb35A","PzlrXGiDlQ8",
+  "qdK1Zl871a4","_Pfr1rN8qJ0","qCOmKT1Mvr4","zqlGr2xqGzg","ASsM9_IXc84",
+  "sgP8gYBPmAk","vdhRSIrLQaQ","JG_B7USeKlc","VR0lZ93dzaI","d0_0jeC1bl8",
+  "6irertfRGFs","ap-eWRz4ZY4","ZDeHFqXm6Os","AcK7ox-0yWo","BNcfyAg5iQc",
+  "cDYLd0vYgOg","bptqLOop8Yg","H4fw25AhB18","u0jCqA0sARs","kkjE4skEzvY",
+  "7z_c9eAvs9o","gMykwdFqQSM","RMWFSB4aiDE","t01rtzvtc64","hmTabsZXQLY",
+  "EiFLwbqDwN0","MtBQDijzysw","Gkk-QAPjFng","3WVh7SXtv8o","oEXsR0W3j_k",
+  "x6a_hYZgOIA","c3wZicSMh3Y","dvdBn6ifzlw","lY8Nc-ZBEO4","MCwkzyt54Rs",
+  "ZP_4ctWpcOM","8H5InfX1GCQ","8l8sB9f0V0A","SLpy4zt41D0","bUReM4dRlB0",
+  "-J3QDfKfnk8","q5VJJgscyKk","hYqoIAJqPNc","-jvpgXWFXGQ","wmiEfMkmwGQ",
+  "J9WqDCpY8dI","AKLBEbH8oSA","CPm0fpbkEbI","L-eeJtq00qA","UrKdc_ddQUM",
+  "rpEAg662WlU","tP8w2A3_g8c","cR7XTj7g_f4","FneaAfgP8BU","VGMEDHIem88",
+  "dgzaD_j-pJ4","_OLhrNH-Uy0","fkQKknRj9l8","Hs0sEjG99gU","9V_UZ66YUfk",
+  "2RWPE9gry-g","Ag-nG72Y6SY","U6v0I9R9fvU","Du2_mT-TEUg","VPirDNqzbdU",
+  "kvnG4CldEho","_GYvsKOsKAw","H00_jnJViBA","gHLhzVaDuIU","8sr7SDwKiuQ",
+  "PbMDB-JcblY","3WJOjCHJ7U0","CdJn4Lb1t5I","Mmfbmfidcps","vNNqzq3Ngfs",
+  "kg-JDpBhQcc","lbl0OnhDiVI","-BoY9VH1ahY","qOHfPaF6qJI","WmpGQtDLWgM",
+  "m6SJCEZIB78","lpZ4sseKRA8","rdXS736hZLM","LsQcM4iTYTg","jq7tsCxnzBs",
+  "izCaMqqCyMQ","ddogJuoALGA","kHaWTZW2NDY","32jzSISgYt4"
 ];
 
-// 114本の中から、ページを開くたびに「完全なランダム」で1本選ぶ
 const pick = videos[Math.floor(Math.random() * videos.length)];
-
-// 選択された正しい動画IDを埋め込みプレイヤーにセット
-document.getElementById("yt").src = "https://www.youtube.com/embed/" + pick;
+document.getElementById("yt").src =
+  "https://www.youtube.com/embed/" + pick;
 </script>
 
-
-
-  
 </body>
 </html>
