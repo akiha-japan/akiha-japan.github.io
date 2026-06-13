@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🚀 SPACE HONGDARS V2 🏍️</title>
   <style>
-    /* 全体のスクロールや余計な挙動を完全にシャットアウト */
     html, body {
       margin: 0;
       padding: 0;
@@ -21,7 +20,6 @@
       user-select: none;
     }
 
-    /* ページ全体のレイアウト：中央寄せ */
     .page-wrapper {
       display: flex;
       flex-direction: column;
@@ -30,7 +28,6 @@
       padding-bottom: 30px;
     }
 
-    /* 最上部にタイトルを表示 */
     .game-title {
       font-size: 1.3rem;
       font-weight: bold;
@@ -43,7 +40,6 @@
       text-shadow: 0 0 10px rgba(0,255,0,0.2);
     }
 
-    /* ゲーム筐体：PCでは480px、スマホでは横幅いっぱい */
     .game-container {
       position: relative;
       width: 100%;
@@ -56,7 +52,6 @@
       border: 1px solid #333;
     }
 
-    /* ゲームキャンバス */
     #gameCanvas {
       display: block;
       width: 100%;
@@ -64,7 +59,6 @@
       background: #000;
     }
 
-    /* 上部UI情報 */
     .hud {
       position: absolute;
       top: 12px;
@@ -82,21 +76,22 @@
     #score-board { color: #ffffff; }
     #life-board { color: #ff3366; }
 
-    /* 通知パネル */
     .state-overlay {
       position: absolute;
       top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      width: 80%;
-      background: rgba(0, 0, 0, 0.9);
+      width: 85%;
+      background: rgba(0, 0, 0, 0.95);
       padding: 20px;
       border-radius: 8px;
       border: 2px solid #555;
       z-index: 20;
+      box-sizing: border-box;
     }
-    .state-overlay h2 { margin: 0 0 10px 0; font-size: 1.6rem; }
+    .state-overlay h2 { margin: 0 0 10px 0; font-size: 1.5rem; line-height: 1.4; }
+    .state-overlay p { margin: 5px 0 15px 0; font-size: 0.95rem; color: #ffcc00; line-height: 1.5; }
     .btn-retry {
       background: #00cc00;
       border: none;
@@ -106,10 +101,9 @@
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 5px;
     }
 
-    /* 説明エリア */
     .info-area {
       width: 90%;
       max-width: 460px;
@@ -154,7 +148,8 @@
 
       <div id="status-panel" class="state-overlay hidden">
         <h2 id="status-title">GAME OVER</h2>
-        <div id="status-score" style="margin: 10px 0; font-size: 1.2rem;"></div>
+        <p id="status-msg"></p>
+        <div id="status-score" style="margin: 10px 0; font-size: 1.2rem; font-weight: bold;"></div>
         <button class="btn-retry" id="btn-retry">RETRY</button>
       </div>
     </div>
@@ -169,7 +164,7 @@
         <span class="strategy-title">💡 攻略ポイント</span>
         ① 敵を撃破すると、まれに豪華な <span style="font-size:1.1rem;">👑</span> が落下してきます。<br>
         ② <span style="color:#ffff00; font-weight:bold;">👑（王冠）を拾うと、攻撃が超強力な「3連ワイドショット」にパワーアップ！</span><br>
-        ③ 被弾すると通常ショットに戻るため、最優先で 👑 をキープし火力を維持するのが勝利の鍵です。
+        ③ 被弾するか、**ステージをクリアすると通常ショット（1段）に戻る**ため、各面の開幕は慎重に立ち回りましょう。
       </div>
     </div>
 
@@ -185,6 +180,7 @@
     
     const statusPanel = document.getElementById("status-panel");
     const statusTitle = document.getElementById("status-title");
+    const statusMsg = document.getElementById("status-msg");
     const statusScore = document.getElementById("status-score");
     const btnRetry = document.getElementById("btn-retry");
 
@@ -210,7 +206,7 @@
     let powerup = null;
 
     let invaderDirection = 1;
-    let baseSpeed = 0.6;
+    let baseSpeed = 0.5; // 5段になったため初期の横移動速度をわずかに調整
     let isPointerDown = false;
 
     function syncLayout() {
@@ -277,15 +273,18 @@
       let spacing = 52;
       let startX = (canvas.width - ((cols - 1) * spacing + 30)) / 2;
 
-      for (let r = 0; r < 3; r++) {
+      // 5段編成（上から順にキャラをバラエティ豊かに配置）
+      for (let r = 0; r < 5; r++) {
         for (let c = 0; c < cols; c++) {
           let type = "bike";
-          if (r === 0) type = "tako";
-          if (r === 1) type = "ari";
+          if (r === 0) type = "tako"; // 🐙
+          if (r === 1) type = "monster"; // 👾 (新)
+          if (r === 2) type = "phone"; // 📱 (新)
+          if (r === 3) type = "ari"; // 🐜
 
           invaders.push({
             x: startX + c * spacing,
-            y: 55 + r * 38,
+            y: 45 + r * 34, // 縦の間隔を少し詰めて画面内に収めています
             width: 30,
             height: 25,
             type: type,
@@ -295,316 +294,6 @@
       }
     }
 
-    // 星背景
     stars = [];
     for(let i=0; i<40; i++) {
-      stars.push({ x: Math.random() * 480, y: Math.random() * 600, speed: Math.random() * 1.2 + 0.4 });
-    }
-
-    // スマホのTouchイベントに最適化
-    function handlePointer(clientX) {
-      const rect = canvas.getBoundingClientRect();
-      const touchX = clientX - rect.left;
-      player.x = touchX - player.width / 2;
-      
-      if (player.x < 0) player.x = 0;
-      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
-    }
-
-    canvas.addEventListener("touchstart", (e) => {
-      if (gameOver || gameClear) return;
-      initAudio();
-      isPointerDown = true;
-      if(e.touches && e.touches[0]) {
-        handlePointer(e.touches[0].clientX);
-      }
-    }, { passive: true });
-
-    canvas.addEventListener("touchmove", (e) => {
-      if (isPointerDown && !gameOver && !gameClear) {
-        if(e.touches && e.touches[0]) {
-          handlePointer(e.touches[0].clientX);
-        }
-      }
-    }, { passive: true });
-
-    canvas.addEventListener("touchend", () => isPointerDown = false);
-    canvas.addEventListener("touchcancel", () => isPointerDown = false);
-
-    // PCマウス用
-    canvas.addEventListener("mousedown", (e) => {
-      if (gameOver || gameClear) return;
-      initAudio();
-      isPointerDown = true;
-      handlePointer(e.clientX);
-    });
-    window.addEventListener("mousemove", (e) => {
-      if (isPointerDown && !gameOver && !gameClear) {
-        handlePointer(e.clientX);
-      }
-    });
-    window.addEventListener("mouseup", () => isPointerDown = false);
-
-    // PCキーボード
-    let rightPressed = false;
-    let leftPressed = false;
-    document.addEventListener("keydown", (e) => {
-      initAudio();
-      if (e.key === "ArrowRight") { rightPressed = true; isPointerDown = true; }
-      if (e.key === "ArrowLeft") { leftPressed = true; isPointerDown = true; }
-    });
-    document.addEventListener("keyup", (e) => {
-      if (e.key === "ArrowRight") { rightPressed = false; if(!leftPressed) isPointerDown = false; }
-      if (e.key === "ArrowLeft") { leftPressed = false; if(!rightPressed) isPointerDown = false; }
-    });
-
-    function checkAutoFire() {
-      if (!isPointerDown || gameOver || gameClear) return;
-      autoFireTimer++;
-      if (autoFireTimer >= 9) { 
-        autoFireTimer = 0;
-        fireBullet();
-      }
-    }
-
-    function fireBullet() {
-      if (player.mode === 'wide') {
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: -1.5 });
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 0 });
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 1.5 });
-      } else {
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 0 });
-      }
-      playSound(340, 'square', 0.04);
-    }
-
-    function playerHit() {
-      if (invulnerableTimer > 0) return; 
-      lives--;
-      player.mode = 'single'; 
-      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
-
-      if (lives <= 0) {
-        gameOver = true;
-        isPointerDown = false;
-        playSound(100, 'sawtooth', 0.6);
-        statusTitle.textContent = "GAME OVER";
-        statusTitle.style.color = "#ff3333";
-        statusScore.textContent = "SCORE: " + score;
-        statusPanel.classList.remove("hidden");
-      } else {
-        invulnerableTimer = 60; 
-        playSound(160, 'sine', 0.25);
-        for(let k=0; k<12; k++) {
-          particles.push({ x: player.x + 15, y: player.y + 10, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: "#00ffff" });
-        }
-      }
-    }
-
-    function resetGame() {
-      score = 0;
-      stage = 1;
-      lives = 3;
-      gameOver = false;
-      gameClear = false;
-      bullets = [];
-      enemyBullets = [];
-      particles = [];
-      player.mode = 'single';
-      isPointerDown = false;
-      scoreEl.textContent = score;
-      lifeEl.textContent = "❤️❤️❤️";
-      statusPanel.classList.add("hidden");
-      syncLayout();
-      initLevel();
-    }
-
-    btnRetry.addEventListener("click", (e) => {
-      e.stopPropagation();
-      resetGame();
-    });
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    function update() {
-      stars.forEach(st => {
-        st.y += st.speed;
-        if(st.y > canvas.height) { st.y = 0; st.x = Math.random() * canvas.width; }
-      });
-
-      if (gameOver || gameClear) return;
-
-      if (invulnerableTimer > 0) invulnerableTimer--;
-
-      if(!ufo && Math.random() < 0.003) {
-        ufo = { x: -30, y: 38, width: 30, height: 20, speed: canvas.width * 0.005 };
-      }
-      if(ufo) {
-        ufo.x += ufo.speed;
-        if(ufo.x > canvas.width) ufo = null;
-      }
-
-      if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
-      if (leftPressed && player.x > 0) player.x -= player.speed;
-
-      checkAutoFire();
-
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        let b = bullets[i]; b.y -= b.speed; b.x += b.vx;
-        if (b.y < 0 || b.x < 0 || b.x > canvas.width) bullets.splice(i, 1);
-      }
-
-      let shiftDown = false;
-      let currentSpeed = (baseSpeed + (stage - 1) * 0.15) * invaderDirection;
-
-      invaders.forEach(inv => {
-        if (!inv.alive) return;
-        inv.x += currentSpeed;
-        if (inv.x > canvas.width - inv.width || inv.x < 0) shiftDown = true;
-        if (inv.y + inv.height >= deadLineY) gameOver = true;
-      });
-
-      if (gameOver) {
-        statusTitle.textContent = "GAME OVER";
-        statusTitle.style.color = "#ff3333";
-        statusScore.textContent = "SCORE: " + score;
-        statusPanel.classList.remove("hidden");
-        return;
-      }
-
-      if (shiftDown) {
-        invaderDirection *= -1;
-        invaders.forEach(inv => { if (inv.alive) inv.y += 12; });
-      }
-
-      invaders.forEach(inv => {
-        if (inv.alive && Math.random() < 0.0004 * stage) {
-          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.3 + stage*0.2, r: 4.5 });
-        }
-      });
-      if (ufo && Math.random() < 0.01) {
-        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3.2, r: 4.5 });
-      }
-
-      for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        let eb = enemyBullets[i]; eb.y += eb.speed;
-        if (eb.y > canvas.height) { enemyBullets.splice(i, 1); continue; }
-        if (eb.x + eb.r > player.x && eb.x - eb.r < player.x + player.width && 
-            eb.y + eb.r > player.y && eb.y - eb.r < player.y + player.height) {
-          enemyBullets.splice(i, 1); playerHit();
-        }
-      }
-
-      // 👑 アイテム落下判定と獲得処理（タイポ修正箇所: player.height）
-      if(powerup) {
-        powerup.y += 1.6;
-        if(powerup.y > canvas.height) {
-          powerup = null;
-        } else if(powerup.x > player.x && powerup.x < player.x + player.width && 
-                  powerup.y > player.y && powerup.y < player.y + player.height) {
-          player.mode = 'wide'; 
-          powerup = null; 
-          playSound(720, 'sine', 0.2); 
-        }
-      }
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--; if(p.life <= 0) particles.splice(i, 1);
-      }
-
-      // 弾の当たり判定
-      for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
-        let b = bullets[bIdx]; let bulletRemoved = false;
-        
-        for (let i = 0; i < invaders.length; i++) {
-          let inv = invaders[i];
-          if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
-            inv.alive = false; bullets.splice(bIdx, 1); bulletRemoved = true;
-            if (inv.type === "tako") score += 30; else if (inv.type === "ari") score += 20; else score += 10;
-            scoreEl.textContent = score; playSound(140, 'sawtooth', 0.04);
-            
-            for(let k=0; k<5; k++) {
-              particles.push({ x: inv.x + inv.width/2, y: inv.y + inv.height/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 12, color: "#ff9900" });
-            }
-            if(Math.random() < 0.16 && !powerup) powerup = { x: inv.x + inv.width/2, y: inv.y };
-            break;
-          }
-        }
-        if (bulletRemoved) continue;
-        if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
-          ufo = null; bullets.splice(bIdx, 1); score += 100; scoreEl.textContent = score; playSound(480, 'sine', 0.18);
-          for(let k=0; k<8; k++) particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 15, color: "#ff9900" });
-        }
-      }
-
-      // ステージクリア判定（安全圏で監視）
-      let anyInvadersAlive = false;
-      for (let i = 0; i < invaders.length; i++) {
-        if (invaders[i].alive) {
-          anyInvadersAlive = true;
-          break;
-        }
-      }
-
-      if (!anyInvadersAlive && invaders.length > 0) {
-        if(stage === 3) { 
-          gameClear = true;
-          statusTitle.textContent = "ALL CLEAR! 🚀";
-          statusTitle.style.color = "#00ff00";
-          statusScore.textContent = "FINAL SCORE: " + score;
-          statusPanel.classList.remove("hidden");
-        } else {
-          stage++; 
-          initLevel(); 
-        }
-      }
-    }
-
-    function draw() {
-      ctx.fillStyle = "#ffffff";
-      stars.forEach(st => ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8));
-
-      ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-      ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath();
-      ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
-
-      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
-        ctx.fillStyle = "#00ff00"; ctx.fillRect(player.x, player.y, player.width, player.height);
-      }
-
-      ctx.fillStyle = "#ffff00"; bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
-
-      enemyBullets.forEach(eb => {
-        ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff3333"; ctx.fill();
-      });
-
-      particles.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); });
-
-      ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      if(powerup) ctx.fillText("👑", powerup.x, powerup.y);
-      if(ufo) ctx.fillText("🛸", ufo.x + ufo.width/2, ufo.y);
-
-      invaders.forEach(inv => {
-        if (inv.alive) {
-          ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
-          if (inv.type === "tako") ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
-          else if (inv.type === "ari") ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
-          else ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
-        }
-      });
-    }
-
-    window.addEventListener("resize", syncLayout);
-    
-    syncLayout();
-    initLevel();
-    gameLoop();
-  </script>
-</body>
-</html>
+      stars.push({ x: Math.random() * 48
