@@ -29,7 +29,7 @@
       width: 100%;
       max-width: 480px;
       height: 100%;
-      max-height: 800px; /* 縦が長すぎる液晶用のストッパー */
+      max-height: 800px;
       background: #000;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
     }
@@ -57,7 +57,7 @@
       justify-content: space-around;
       font-size: 1rem;
       font-weight: bold;
-      pointer-events: none; /* タッチをスルーさせる */
+      pointer-events: none;
       text-shadow: 2px 2px 4px #000, -2px -2px 4px #000;
       z-index: 10;
     }
@@ -73,7 +73,7 @@
       transform: translate(-50%, -50%);
       text-align: center;
       width: 85%;
-      background: rgba(17, 17, 17, 0.9);
+      background: rgba(17, 17, 17, 0.95);
       padding: 20px;
       border-radius: 12px;
       border: 2px solid #444;
@@ -179,7 +179,7 @@
     let invulnerableTimer = 0; 
     let autoFireTimer = 0; 
 
-    const player = { x: 0, y: 0, width: 35, height: 22, speed: 6, mode: 'single' };
+    const player = { x: 100, y: 500, width: 35, height: 22, speed: 6, mode: 'single' };
     let deadLineY = 0; 
 
     let bullets = [];
@@ -195,20 +195,28 @@
 
     let isPointerDown = false;
 
-    // レスポンシブ＆480px制限対応
+    // キャンバスリサイズ処理の修正
     function resizeCanvas() {
       const container = document.querySelector('.game-container');
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
+      const w = container.clientWidth || 480;
+      const h = container.clientHeight || 800;
+      
+      canvas.width = w;
+      canvas.height = h;
 
-      player.y = canvas.height - 80;
-      deadLineY = canvas.height - 100;
+      player.y = h - 80;
+      deadLineY = h - 100;
 
-      if (!isStarted && player.x === 0) {
-        player.x = canvas.width / 2 - player.width / 2;
+      // ナンバーエラー（NaN）を防止する安全な初期位置設定
+      if (player.x === 0 || isNaN(player.x) || player.x > w) {
+        player.x = w / 2 - player.width / 2;
       }
     }
+    
+    // 初期化とリサイズ登録
     window.addEventListener("resize", resizeCanvas);
+    // 確実にコンテナ描画が終わった段階で位置確定させる
+    window.addEventListener("DOMContentLoaded", resizeCanvas);
     resizeCanvas();
 
     function initAudio() {
@@ -255,7 +263,7 @@
 
       let cols = Math.floor(canvas.width / 60);
       if (cols < 4) cols = 4;
-      if (cols > 7) cols = 7; // 480px枠に合わせて最大列数を微調整
+      if (cols > 7) cols = 7;
       
       let spacing = 52;
       let startX = (canvas.width - ((cols - 1) * spacing + 30)) / 2;
@@ -284,11 +292,11 @@
       stars.push({ x: Math.random() * 480, y: Math.random() * 800, speed: Math.random() * 1.5 + 0.5 });
     }
 
-    // タッチ・マウス操作
+    // タッチ・マウス操作（ゲーム開始後のみ反応するように修正）
     window.addEventListener("pointerdown", (e) => {
+      if (!isStarted || gameOver || gameClear) return;
       initAudio();
-      if (!isStarted) return;
-      // ゲームエリア内を触っている時だけ自機を動かす
+      
       const rect = canvas.getBoundingClientRect();
       if (e.clientX >= rect.left && e.clientX <= rect.right) {
         isPointerDown = true;
@@ -319,6 +327,7 @@
     let rightPressed = false;
     let leftPressed = false;
     document.addEventListener("keydown", (e) => {
+      if (!isStarted) return;
       initAudio();
       if (e.key === "ArrowRight") { rightPressed = true; isPointerDown = true; }
       if (e.key === "ArrowLeft") { leftPressed = true; isPointerDown = true; }
@@ -332,7 +341,7 @@
       if (!isPointerDown || gameOver || gameClear) return;
 
       autoFireTimer++;
-      if (autoFireTimer >= 9) { // 連射速度をほんのりアップ（9フレームに1回）
+      if (autoFireTimer >= 9) { 
         autoFireTimer = 0;
         fireBullet();
       }
@@ -368,6 +377,7 @@
 
     function triggerGameOver() {
       gameOver = true;
+      isPointerDown = false;
       playSound(100, 'sawtooth', 0.6);
       overlayTitle.textContent = "GAME OVER";
       overlayTitle.style.color = "red";
@@ -378,6 +388,7 @@
 
     function triggerGameClear() {
       gameClear = true;
+      isPointerDown = false;
       overlayTitle.textContent = "ALL CLEAR! 🚀";
       overlayTitle.style.color = "#00ff00";
       overlayBody.innerHTML = "<div class='instruction-box'><p>ホングダーから地球の平和は守られた！君こそ真の英雄だ！</p></div><p style='font-size:1.4rem;color:#fff;font-weight:bold;margin:10px 0;'>FINAL SCORE: " + score + "</p>";
@@ -385,9 +396,13 @@
       overlay.classList.remove("hidden");
     }
 
-    btnAction.addEventListener("click", () => {
+    // STARTボタンのクリックイベント
+    btnAction.addEventListener("click", (e) => {
+      e.stopPropagation(); // 誤作動防止
       initAudio();
-      overlay.classList.add("hidden");
+      
+      // リサイズを強制的に走らせて座標を確定させる
+      resizeCanvas();
       
       score = 0;
       stage = 1;
@@ -397,28 +412,25 @@
       bullets = [];
       enemyBullets = [];
       particles = [];
+      isPointerDown = false;
+      
       scoreEl.textContent = score;
       lifeEl.textContent = "❤️❤️❤️";
       
+      overlay.classList.add("hidden");
       isStarted = true;
       initLevel();
     });
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (isStarted) {
-        update();
-      }
+      update();
       draw();
       requestAnimationFrame(gameLoop);
     }
 
     function update() {
-      if (gameOver || gameClear) return;
-
-      if (invulnerableTimer > 0) invulnerableTimer--;
-
+      // 背景の星だけはタイトル画面でも動かす
       stars.forEach(st => {
         st.y += st.speed;
         if(st.y > canvas.height) {
@@ -426,6 +438,10 @@
           st.x = Math.random() * canvas.width;
         }
       });
+
+      if (!isStarted || gameOver || gameClear) return;
+
+      if (invulnerableTimer > 0) invulnerableTimer--;
 
       if(!ufo && Math.random() < 0.003) {
         ufo = { x: -30, y: 40, width: 30, height: 20, speed: canvas.width * 0.005 };
@@ -495,14 +511,13 @@
         }
       }
 
-      // 👑 アイテムの更新
       if(powerup) {
         powerup.y += 1.8;
         if(powerup.y > canvas.height) powerup = null;
         else if(powerup.x > player.x && powerup.x < player.x + player.width && powerup.y > player.y && powerup.y < player.y + player.height) {
           player.mode = 'wide'; 
           powerup = null;
-          playSound(700, 'sine', 0.2); // アイテム獲得音を少し高く華やかに
+          playSound(700, 'sine', 0.2); 
         }
       }
 
@@ -514,7 +529,6 @@
         if(p.life <= 0) particles.splice(i, 1);
       }
 
-      // 当たり判定
       for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
         let b = bullets[bIdx];
         let bulletRemoved = false;
@@ -544,7 +558,6 @@
               });
             }
 
-            // 👑 の出現判定
             if(Math.random() < 0.15 && !powerup) {
               powerup = { x: inv.x + inv.width/2, y: inv.y };
             }
@@ -567,7 +580,4 @@
           ufo = null;
           bullets.splice(bIdx, 1);
           score += 100;
-          scoreEl.textContent = score;
-          playSound(500, 'sine', 0.2);
-          for(let k=0; k<10; k++) {
-            particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 20, color: "#ff9900" });
+          scoreEl.textContent =
