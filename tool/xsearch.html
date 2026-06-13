@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X高度検索ジェネレーター</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      font-size: 16px;
+    }
+    .row {
+      margin-bottom: 12px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .small {
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<h2>高度な検索もどき</h2>
+
+<div class="row">
+  <div class="small">キーワード</div>
+  <input id="all" placeholder="例: happy hour" />
+</div>
+
+<div class="row">
+  <div class="small">含めないキーワード</div>
+  <input id="not" placeholder="例: ads spam" />
+</div>
+
+<div class="row">
+  <div class="small">アカウント（from）</div>
+  <input id="from" placeholder="例: X" />
+</div>
+
+<div class="row">
+  <div class="small">ハッシュタグ</div>
+  <input id="tag" placeholder="例: ThrowbackThursday" />
+</div>
+
+<div class="row">
+  <div class="small">最小いいね数</div>
+  <input id="likes" type="number" placeholder="例: 100" />
+</div>
+
+<button onclick="makeQuery()">検索コマンド生成</button>
+<button onclick="searchX()">Xで検索</button>
+
+<pre id="out"></pre>
+
+<script>
+function buildQuery() {
+  let q = "";
+
+  const all = document.getElementById("all").value;
+  const not = document.getElementById("not").value;
+  const from = document.getElementById("from").value;
+  const tag = document.getElementById("tag").value;
+  const likes = document.getElementById("likes").value;
+
+  if (all) q += all + " ";
+  if (not) q += "-" + not + " ";
+  if (from) q += "from:" + from + " ";
+  if (tag) q += "#" + tag + " ";
+  if (likes) q += "min_faves:" + likes + " ";
+
+  return q.trim();
+}
+
+function makeQuery() {
+  const q = buildQuery();
+  document.getElementById("out").textContent = q;
+}
+
+function searchX() {
+  const q = buildQuery();
+  const url = "https://twitter.com/search?q=" + encodeURIComponent(q);
+  window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
