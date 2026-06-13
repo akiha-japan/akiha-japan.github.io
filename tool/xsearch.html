@@ -3,87 +3,196 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X高度検索ジェネレーター</title>
+  <title>X検索ジェネレーター</title>
+
   <style>
     body {
       font-family: sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: 20px auto;
       padding: 10px;
+      background: #fafafa;
     }
-    input, button {
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .box {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: 12px;
+      color: #555;
+      display: block;
+      margin-top: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    button {
       width: 100%;
       padding: 10px;
-      margin: 6px 0;
+      margin-top: 10px;
       font-size: 16px;
+      cursor: pointer;
     }
-    .row {
-      margin-bottom: 12px;
+
+    pre {
+      background: #111;
+      color: #0f0;
       padding: 10px;
-      border: 1px solid #ccc;
-    }
-    .small {
-      font-size: 12px;
-      color: #666;
+      overflow-x: auto;
     }
   </style>
 </head>
+
 <body>
 
-<h2>高度な検索もどき</h2>
+<h2>高度な検索もどき ●保守党アプリ</h2>
 
-<div class="row">
-  <div class="small">キーワード</div>
-  <input id="all" placeholder="例: happy hour" />
-</div>
+<div class="box">
+  <label>キーワード</label>
+  <input id="keyword" placeholder="例: what's happening" />
 
-<div class="row">
-  <div class="small">含めないキーワード</div>
-  <input id="not" placeholder="例: ads spam" />
-</div>
+  <label>完全一致</label>
+  <input id="exact" placeholder="例: happy hour" />
 
-<div class="row">
-  <div class="small">アカウント（from）</div>
-  <input id="from" placeholder="例: X" />
-</div>
+  <label>いずれか含む（スペース区切り OR）</label>
+  <input id="any" placeholder="例: cats dogs" />
 
-<div class="row">
-  <div class="small">ハッシュタグ</div>
+  <label>含まない</label>
+  <input id="none" placeholder="例: spam ads" />
+
+  <label>ハッシュタグ</label>
   <input id="tag" placeholder="例: ThrowbackThursday" />
 </div>
 
-<div class="row">
-  <div class="small">最小いいね数</div>
-  <input id="likes" type="number" placeholder="例: 100" />
+<div class="box">
+  <label>アカウント from</label>
+  <input id="from" placeholder="例: X" />
+
+  <label>アカウント to</label>
+  <input id="to" placeholder="例: X" />
+
+  <label>メンション</label>
+  <input id="mention" placeholder="例: SFBART" />
+</div>
+
+<div class="box">
+  <label>返信フィルタ</label>
+  <select id="replies">
+    <option value="">指定なし</option>
+    <option value="no">返信を除外</option>
+  </select>
+
+  <label>リンクフィルタ</label>
+  <select id="links">
+    <option value="">指定なし</option>
+    <option value="yes">リンクを含む</option>
+    <option value="only">リンクのみ</option>
+  </select>
+</div>
+
+<div class="box">
+  <label>最小返信数</label>
+  <input id="repliesMin" type="number" placeholder="例: 200" />
+
+  <label>最小いいね数</label>
+  <input id="likesMin" type="number" placeholder="例: 280" />
+
+  <label>最小リポスト数</label>
+  <input id="repostMin" type="number" placeholder="例: 100" />
+</div>
+
+<div class="box">
+  <label>開始日 (YYYY-MM-DD)</label>
+  <input id="since" placeholder="例: 2026-05-01" />
+
+  <label>終了日 (YYYY-MM-DD)</label>
+  <input id="until" placeholder="例: 2026-06-01" />
 </div>
 
 <button onclick="makeQuery()">検索コマンド生成</button>
 <button onclick="searchX()">Xで検索</button>
 
+<h3>生成結果</h3>
 <pre id="out"></pre>
 
 <script>
 function buildQuery() {
   let q = "";
 
-  const all = document.getElementById("all").value;
-  const not = document.getElementById("not").value;
-  const from = document.getElementById("from").value;
+  const keyword = document.getElementById("keyword").value;
+  const exact = document.getElementById("exact").value;
+  const any = document.getElementById("any").value;
+  const none = document.getElementById("none").value;
   const tag = document.getElementById("tag").value;
-  const likes = document.getElementById("likes").value;
 
-  if (all) q += all + " ";
-  if (not) q += "-" + not + " ";
-  if (from) q += "from:" + from + " ";
+  const from = document.getElementById("from").value;
+  const to = document.getElementById("to").value;
+  const mention = document.getElementById("mention").value;
+
+  const replies = document.getElementById("replies").value;
+  const links = document.getElementById("links").value;
+
+  const repliesMin = document.getElementById("repliesMin").value;
+  const likesMin = document.getElementById("likesMin").value;
+  const repostMin = document.getElementById("repostMin").value;
+
+  const since = document.getElementById("since").value;
+  const until = document.getElementById("until").value;
+
+  // キーワード
+  if (keyword) q += keyword + " ";
+  if (exact) q += `"${exact}" `;
+  if (any) q += any.split(" ").join(" OR ") + " ";
+  if (none) q += none.split(" ").map(w => "-" + w).join(" ") + " ";
   if (tag) q += "#" + tag + " ";
-  if (likes) q += "min_faves:" + likes + " ";
+
+  // アカウント
+  if (from) q += `from:${from} `;
+  if (to) q += `to:${to} `;
+  if (mention) q += `@${mention} `;
+
+  // フィルタ
+  if (replies === "no") q += "-filter:replies ";
+  if (links === "yes") q += "filter:links ";
+  if (links === "only") q += "filter:links ";
+
+  // エンゲージメント
+  if (repliesMin) q += `min_replies:${repliesMin} `;
+  if (likesMin) q += `min_faves:${likesMin} `;
+  if (repostMin) q += `min_retweets:${repostMin} `;
+
+  // 日付
+  if (since) q += `since:${since} `;
+  if (until) q += `until:${until} `;
 
   return q.trim();
 }
 
 function makeQuery() {
-  const q = buildQuery();
-  document.getElementById("out").textContent = q;
+  document.getElementById("out").textContent = buildQuery();
 }
 
 function searchX() {
