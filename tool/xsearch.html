@@ -10,24 +10,23 @@ body {
   font-family: sans-serif;
   background: #f5f7f9;
   margin: 0;
-  padding: 20px;
+  padding: 12px;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 720px;
   margin: auto;
 }
 
-/* ヘッダー行（タイトル＋リンクアイコン） */
+/* ヘッダー */
 .header-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 5px;
+  align-items: center;
 }
 
 .header {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
 }
 
@@ -36,34 +35,30 @@ body {
   text-decoration: none;
   padding: 6px 10px;
   border-radius: 6px;
-  background: #fff;
   border: 1px solid #ddd;
-}
-
-.icon-link:hover {
-  background: #f0f0f0;
+  background: #fff;
 }
 
 .sub {
   font-size: 12px;
   color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 /* カード */
 .box {
   background: #fff;
   border: 1px solid #ddd;
-  padding: 12px;
-  margin-bottom: 10px;
   border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
 .section-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
-  margin: 10px 0 5px;
-  color: #333;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 input, select {
@@ -75,41 +70,40 @@ input, select {
   box-sizing: border-box;
 }
 
-.row {
-  display: flex;
-  gap: 10px;
-}
-
-.row > div {
-  flex: 1;
-}
-
+/* ボタン */
 button {
   width: 100%;
-  padding: 10px;
-  margin-top: 8px;
+  padding: 12px;
   font-size: 15px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  margin-top: 6px;
   cursor: pointer;
 }
 
 .btn1 {
   background: #1d9bf0;
-  color: #fff;
+  color: white;
 }
 
 .btn2 {
-  background: #222;
-  color: #fff;
+  background: #111;
+  color: white;
 }
 
+/* 出力 */
 pre {
   background: #111;
   color: #0f0;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow-x: auto;
+}
+
+/* スマホ */
+@media (max-width: 600px) {
+  .header { font-size: 16px; }
+  button { font-size: 14px; }
 }
 </style>
 </head>
@@ -125,7 +119,7 @@ pre {
   <a class="icon-link"
      href="https://hoshuto-app.vercel.app/x-search"
      target="_blank"
-     title="高度な検索もどきを開く">
+     title="元ページ">
     🔗
   </a>
 </div>
@@ -153,8 +147,8 @@ pre {
 <!-- アカウント -->
 <div class="box">
   <div class="section-title">アカウント</div>
-  <input id="from" placeholder="from: X" />
-  <input id="to" placeholder="to: X" />
+  <input id="from" placeholder="from:" />
+  <input id="to" placeholder="to:" />
   <input id="mention" placeholder="@mention" />
 </div>
 
@@ -166,8 +160,6 @@ pre {
     <option value="">返信フィルタなし</option>
     <option value="no">返信を除外</option>
   </select>
-
-  <br><br>
 
   <select id="links">
     <option value="">リンクフィルタなし</option>
@@ -184,72 +176,100 @@ pre {
   <input id="repostMin" type="number" placeholder="最小リポスト数" />
 </div>
 
-<!-- 日付 -->
+<!-- 日付（2010〜2035・デフォ2026） -->
 <div class="box">
-  <div class="section-title">日付</div>
+  <div class="section-title">日付（以降）</div>
+  <div style="display:flex; gap:5px;">
+    <select id="sy"></select>
+    <select id="sm"></select>
+    <select id="sd"></select>
+  </div>
 
-  <input id="since" placeholder="since: 2026-01-01" />
-  <input id="until" placeholder="until: 2026-12-31" />
+  <div class="section-title">日付（以前）</div>
+  <div style="display:flex; gap:5px;">
+    <select id="ey"></select>
+    <select id="em"></select>
+    <select id="ed"></select>
+  </div>
 </div>
 
-<!-- ボタン -->
+<!-- 順番 -->
 <button class="btn1" onclick="makeQuery()">検索コマンド生成</button>
-<button class="btn2" onclick="searchX()">Xで検索</button>
 
 <h3>生成結果</h3>
 <pre id="out"></pre>
 
+<button class="btn2" onclick="searchX()">Xで検索</button>
+
 </div>
 
 <script>
+
+// 年月日セレクト生成
+function fillSelect(id, start, end, def) {
+  const el = document.getElementById(id);
+  for (let i = start; i <= end; i++) {
+    const opt = document.createElement("option");
+    opt.value = i < 10 ? "0"+i : ""+i;
+    opt.textContent = i;
+    if (i === def) opt.selected = true;
+    el.appendChild(opt);
+  }
+}
+
+// 2010〜2035、デフォ2026
+fillSelect("sy", 2010, 2035, 2026);
+fillSelect("ey", 2010, 2035, 2026);
+
+fillSelect("sm", 1, 12, 1);
+fillSelect("em", 1, 12, 12);
+
+fillSelect("sd", 1, 31, 1);
+fillSelect("ed", 1, 31, 31);
+
 function buildQuery() {
   let q = "";
 
-  const keyword = document.getElementById("keyword").value;
-  const exact = document.getElementById("exact").value;
-  const any = document.getElementById("any").value;
-  const none = document.getElementById("none").value;
-  const tag = document.getElementById("tag").value;
+  const keyword = keyword.value;
+  const exact = exact.value;
+  const any = any.value;
+  const none = none.value;
+  const tag = tag.value;
 
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-  const mention = document.getElementById("mention").value;
+  const from = from.value;
+  const to = to.value;
+  const mention = mention.value;
 
-  const replies = document.getElementById("replies").value;
-  const links = document.getElementById("links").value;
+  const replies = replies.value;
+  const links = links.value;
 
-  const repliesMin = document.getElementById("repliesMin").value;
-  const likesMin = document.getElementById("likesMin").value;
-  const repostMin = document.getElementById("repostMin").value;
+  const repliesMin = repliesMin.value;
+  const likesMin = likesMin.value;
+  const repostMin = repostMin.value;
 
-  const since = document.getElementById("since").value;
-  const until = document.getElementById("until").value;
+  const sy = sy.value, sm = sm.value, sd = sd.value;
+  const ey = ey.value, em = em.value, ed = ed.value;
 
-  // キーワード
   if (keyword) q += keyword + " ";
   if (exact) q += `"${exact}" `;
   if (any) q += any.split(" ").join(" OR ") + " ";
   if (none) q += none.split(" ").map(w => "-" + w).join(" ") + " ";
   if (tag) q += "#" + tag + " ";
 
-  // アカウント
   if (from) q += `from:${from} `;
   if (to) q += `to:${to} `;
   if (mention) q += `@${mention} `;
 
-  // フィルタ
   if (replies === "no") q += "-filter:replies ";
   if (links === "yes") q += "filter:links ";
   if (links === "only") q += "filter:links ";
 
-  // エンゲージメント
   if (repliesMin) q += `min_replies:${repliesMin} `;
   if (likesMin) q += `min_faves:${likesMin} `;
   if (repostMin) q += `min_retweets:${repostMin} `;
 
-  // 日付
-  if (since) q += `since:${since} `;
-  if (until) q += `until:${until} `;
+  if (sy && sm && sd) q += `since:${sy}-${sm}-${sd} `;
+  if (ey && em && ed) q += `until:${ey}-${em}-${ed} `;
 
   return q.trim();
 }
@@ -263,6 +283,7 @@ function searchX() {
   const url = "https://twitter.com/search?q=" + encodeURIComponent(q);
   window.open(url, "_blank");
 }
+
 </script>
 
 </body>
