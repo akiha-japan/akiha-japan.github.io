@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS Version 2.4 🏍️</title>
+  <title>🚀 SPACE HONGDARS Version 2.1 🏍️</title>
   <style>
     html, body {
       margin: 0;
@@ -121,14 +121,6 @@
       border: 1px solid #333;
       margin-bottom: 10px;
     }
-    .strategy-title {
-      color: #ff9900;
-      font-weight: bold;
-      display: block;
-      margin-bottom: 4px;
-      border-bottom: 1px dashed #444;
-      padding-bottom: 2px;
-    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -136,7 +128,7 @@
 
   <div class="page-wrapper">
     
-    <div class="game-title">🚀 SPACE HONGDARS Version 2.4 🏍️</div>
+    <div class="game-title">🚀 SPACE HONGDARS Version 2.1 🐜</div>
     
     <div class="game-container">
       <div class="hud">
@@ -157,15 +149,8 @@
 
     <div class="info-area">
       <div class="instruction-box">
-        <span style="color:#00ff00; font-weight:bold;">【操作方法】</span><br>
-        ゲーム画面を左右にドラッグ（PCは左右矢印キー）で自機移動。触っている間は弾がオート連射されます。画面の外側をなぞれば上下スクロールも可能です！
-      </div>
-      
-      <div class="instruction-box">
-        <span class="strategy-title">💡 攻略ポイント</span>
-        ① 敵を撃破すると、まれに豪華な <span style="font-size:1.1rem;">👑</span> が落下してきます。<br>
-        ② <span style="color:#ffff00; font-weight:bold;">👑（王冠）を拾うと、攻撃が超強力な「3連ワイドショット」にパワーアップ！</span><br>
-        ③ 被弾するか、ステージをクリアすると通常ショット（1段）に戻るため、各面の開幕は慎重に立ち回りましょう。
+        画面をタッチしたまま左右にスライドして自機（🟩）を動かします。タッチしている間、弾は自動で連射されます。<br>
+        時々現れる王冠（👑）を取ると、弾が3方向のワイドショットにパワーアップします。
       </div>
     </div>
 
@@ -205,11 +190,12 @@
     let enemyBullets = [];
     let ufo = null;
     let powerup = null;
+    let boss = null; 
 
     let invaderDirection = 1;
     let baseSpeed = 0.5; 
     let isPointerDown = false;
-    let totalInvadersInLevel = 0; // 🌟初期の敵の総数を記憶する変数
+    let totalInvadersInLevel = 0; 
 
     function syncLayout() {
       const container = document.querySelector('.game-container');
@@ -222,7 +208,9 @@
       player.y = h - 50;
       deadLineY = h - 70;
 
-      if (player.x > w - player.width || player.x === 220) {
+      if (player.x < 0) player.x = 0;
+      if (player.x > w - player.width) player.x = w - player.width;
+      if (player.x === 220) {
         player.x = w / 2 - player.width / 2;
       }
     }
@@ -252,7 +240,7 @@
 
     function updateStageDisplay() {
       if (stage === 3) {
-        stageBoardEl.innerHTML = "<span style='color:#ff3333;'>LAST STAGE</span>";
+        stageBoardEl.innerHTML = "<span style='color:#ff3333; font-weight:bold;'>BOSS STAGE</span>";
       } else {
         stageBoardEl.innerHTML = "STAGE: <span>" + stage + "</span>";
       }
@@ -264,9 +252,25 @@
       enemyBullets = [];
       ufo = null;
       powerup = null;
+      boss = null;
       invaderDirection = 1;
 
       updateStageDisplay();
+
+      if (stage === 3) {
+        boss = {
+          x: canvas.width / 2 - 40,
+          y: 90, 
+          width: 80,
+          height: 40,
+          hp: 30,
+          maxHp: 30,
+          vx: 2,
+          hitFlash: 0,
+          shootTimer: 0
+        };
+        return;
+      }
 
       let cols = Math.floor(canvas.width / 60);
       if (cols < 4) cols = 4;
@@ -278,10 +282,12 @@
       for (let r = 0; r < 5; r++) {
         for (let c = 0; c < cols; c++) {
           let type = "bike";
-          if (r === 0) type = "tako"; 
-          if (r === 1) type = "monster"; 
-          if (r === 2) type = "phone";   
-          if (r === 3) type = "ari";   
+          let hp = 1; 
+          
+          if (r === 0) { type = "tako"; hp = 2; } 
+          if (r === 1) { type = "monster"; } 
+          if (r === 2) { type = "phone"; }        
+          if (r === 3) { type = "ari"; }   
 
           invaders.push({
             x: startX + c * spacing,
@@ -289,11 +295,14 @@
             width: 30,
             height: 25,
             type: type,
+            hp: hp,           
+            maxHp: hp,        
+            hitFlash: 0,      
             alive: true
           });
         }
       }
-      totalInvadersInLevel = invaders.length; // 🌟今回の面の敵の数を保存
+      totalInvadersInLevel = invaders.length; 
     }
 
     stars = [];
@@ -304,10 +313,12 @@
     function handlePointer(clientX) {
       const rect = canvas.getBoundingClientRect();
       const touchX = clientX - rect.left;
-      player.x = touchX - player.width / 2;
+      let targetX = touchX - player.width / 2;
       
-      if (player.x < 0) player.x = 0;
-      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+      if (targetX < 0) targetX = 0;
+      if (targetX > canvas.width - player.width) targetX = canvas.width - player.width;
+      
+      player.x = targetX;
     }
 
     canvas.addEventListener("touchstart", (e) => {
@@ -375,6 +386,17 @@
       playSound(340, 'square', 0.04);
     }
 
+    function triggerGameOver(message = "") {
+      gameOver = true;
+      isPointerDown = false;
+      playSound(100, 'sawtooth', 0.6);
+      statusTitle.textContent = "GAME OVER";
+      statusTitle.style.color = "#ff3333";
+      statusMsg.textContent = message;
+      statusScore.textContent = "SCORE: " + score;
+      statusPanel.classList.remove("hidden");
+    }
+
     function playerHit() {
       if (invulnerableTimer > 0) return; 
       lives--;
@@ -382,14 +404,7 @@
       lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
 
       if (lives <= 0) {
-        gameOver = true;
-        isPointerDown = false;
-        playSound(100, 'sawtooth', 0.6);
-        statusTitle.textContent = "GAME OVER";
-        statusTitle.style.color = "#ff3333";
-        statusMsg.textContent = "";
-        statusScore.textContent = "SCORE: " + score;
-        statusPanel.classList.remove("hidden");
+        triggerGameOver();
       } else {
         invulnerableTimer = 60; 
         playSound(160, 'sine', 0.25);
@@ -449,6 +464,8 @@
 
       if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
       if (leftPressed && player.x > 0) player.x -= player.speed;
+      if (player.x < 0) player.x = 0;
+      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 
       checkAutoFire();
 
@@ -457,53 +474,92 @@
         if (b.y < 0 || b.x < 0 || b.x > canvas.width) bullets.splice(i, 1);
       }
 
-      // 🌟【案①：加速ロジック】現在の生存数をカウント
-      let aliveCount = 0;
-      invaders.forEach(inv => { if (inv.alive) aliveCount++; });
-
-      // 敵が減るほど速度倍率を上げる（最大で約3倍速）
-      let speedMultiplier = 1.0;
-      if (totalInvadersInLevel > 0 && aliveCount > 0) {
-        let deathRatio = (totalInvadersInLevel - aliveCount) / totalInvadersInLevel;
-        speedMultiplier = 1.0 + deathRatio * 2.0; 
-      }
-
-      let shiftDown = false;
-      let currentSpeed = (baseSpeed + (stage - 1) * 0.12) * invaderDirection * speedMultiplier;
-
-      invaders.forEach(inv => {
-        if (!inv.alive) return;
-        inv.x += currentSpeed;
-        if (inv.x > canvas.width - inv.width || inv.x < 0) shiftDown = true;
-        if (inv.y + inv.height >= deadLineY) gameOver = true;
-      });
-
-      if (gameOver) {
-        statusTitle.textContent = "GAME OVER";
-        statusTitle.style.color = "#ff3333";
-        statusMsg.textContent = "";
-        statusScore.textContent = "SCORE: " + score;
-        statusPanel.classList.remove("hidden");
-        return;
-      }
-
-      if (shiftDown) {
-        invaderDirection *= -1;
-        invaders.forEach(inv => { if (inv.alive) inv.y += 10; });
-      }
-
-      invaders.forEach(inv => {
-        if (inv.alive && Math.random() < 0.0003 * stage) {
-          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.2 + stage*0.2, r: 4.5 });
+      // BOSS STAGE
+      if (stage === 3 && boss) {
+        if (boss.hitFlash > 0) boss.hitFlash--;
+        boss.x += boss.vx;
+        if (boss.x <= 0 || boss.x >= canvas.width - boss.width) {
+          boss.vx *= -1;
         }
-      });
-      if (ufo && Math.random() < 0.01) {
-        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3.2, r: 4.5 });
+
+        boss.shootTimer++;
+        if (boss.shootTimer > 45) { 
+          boss.shootTimer = 0;
+          let bx = boss.x + boss.width / 2;
+          let by = boss.y + boss.height;
+          
+          enemyBullets.push({ x: bx, y: by, speed: 3.2, vx: -1.2, r: 5 });
+          enemyBullets.push({ x: bx, y: by, speed: 3.5, vx: 0, r: 5 });
+          enemyBullets.push({ x: bx, y: by, speed: 3.2, vx: 1.2, r: 5 });
+          playSound(200, 'triangle', 0.1);
+        }
+      } 
+      // ZAKO STAGE
+      else {
+        let aliveCount = 0;
+        invaders.forEach(inv => { 
+          if (inv.alive) aliveCount++; 
+          if (inv.hitFlash > 0) inv.hitFlash--; 
+        });
+
+        let speedMultiplier = 1.0;
+        if (totalInvadersInLevel > 0 && aliveCount > 0) {
+          let deathRatio = (totalInvadersInLevel - aliveCount) / totalInvadersInLevel;
+          speedMultiplier = 1.0 + deathRatio * 2.0; 
+        }
+
+        let shiftDown = false;
+        let currentSpeed = (baseSpeed + (stage - 1) * 0.12) * invaderDirection * speedMultiplier;
+
+        // 🌟【バグ修正箇所】ライン侵略時に正しくゲームオーバー画面を表示
+        for (let i = 0; i < invaders.length; i++) {
+          let inv = invaders[i];
+          if (!inv.alive) continue;
+          inv.x += currentSpeed;
+          if (inv.x > canvas.width - inv.width || inv.x < 0) shiftDown = true;
+          
+          if (inv.y + inv.height >= deadLineY) {
+            triggerGameOver("地球が侵略されてしまった！");
+            return;
+          }
+        }
+
+        if (shiftDown) {
+          invaderDirection *= -1;
+          invaders.forEach(inv => { if (inv.alive) inv.y += 10; });
+        }
+
+        let shootProbability = 0.0005; 
+        if (stage === 2) {
+          shootProbability = 0.00075; 
+        }
+
+        invaders.forEach(inv => {
+          if (inv.alive && Math.random() < shootProbability * stage) {
+            enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.8 + stage*0.2, vx: 0, r: 4.5 });
+          }
+        });
+      }
+
+      if (ufo && Math.random() < 0.012) {
+        let ufoCenterX = ufo.x + ufo.width / 2;
+        let ufoCenterY = ufo.y + ufo.height;
+        let dx = (player.x + player.width / 2) - ufoCenterX;
+        let dy = player.y - ufoCenterY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        let bulletSpeed = 3.8;
+        enemyBullets.push({ x: ufoCenterX, y: ufoCenterY, speed: (dy / distance) * bulletSpeed, vx: (dx / distance) * bulletSpeed, r: 4.5 });
       }
 
       for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        let eb = enemyBullets[i]; eb.y += eb.speed;
-        if (eb.y > canvas.height) { enemyBullets.splice(i, 1); continue; }
+        let eb = enemyBullets[i]; 
+        eb.y += eb.speed;
+        if (eb.vx) eb.x += eb.vx;
+
+        if (eb.y > canvas.height || eb.x < 0 || eb.x > canvas.width) { 
+          enemyBullets.splice(i, 1); 
+          continue; 
+        }
         if (eb.x + eb.r > player.x && eb.x - eb.r < player.x + player.width && 
             eb.y + eb.r > player.y && eb.y - eb.r < player.y + player.height) {
           enemyBullets.splice(i, 1); playerHit();
@@ -527,44 +583,85 @@
       }
 
       for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
-        let b = bullets[bIdx]; let bulletRemoved = false;
+        let b = bullets[bIdx]; 
+        let bulletRemoved = false;
         
-        for (let i = 0; i < invaders.length; i++) {
-          let inv = invaders[i];
-          if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
-            inv.alive = false; bullets.splice(bIdx, 1); bulletRemoved = true;
-            
-            if (inv.type === "tako") score += 40; 
-            else if (inv.type === "monster") score += 30;
-            else if (inv.type === "phone") score += 20;
-            else if (inv.type === "ari") score += 15;
-            else score += 10;
+        if (stage === 3 && boss) {
+          if (b.x > boss.x && b.x < boss.x + boss.width && b.y > boss.y && b.y < boss.y + boss.height) {
+            bullets.splice(bIdx, 1);
+            bulletRemoved = true;
+            boss.hp--;
+            boss.hitFlash = 4;
+            score += 10;
+            scoreEl.textContent = score;
+            playSound(220, 'triangle', 0.04);
 
-            scoreEl.textContent = score; playSound(140, 'sawtooth', 0.04);
-            
-            for(let k=0; k<5; k++) {
-              particles.push({ x: inv.x + inv.width/2, y: inv.y + inv.height/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 12, color: "#ff9900" });
+            for(let k=0; k<3; k++) {
+              particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 10, color: "#ffff00" });
             }
-            if(Math.random() < 0.15 && !powerup) powerup = { x: inv.x + inv.width/2, y: inv.y };
-            break;
+
+            if (boss.hp <= 0) {
+              gameClear = true;
+              score += 1000; 
+              scoreEl.textContent = score;
+              playSound(600, 'sine', 0.8);
+              statusTitle.textContent = "ALL STAGE CLEAR!";
+              statusTitle.style.color = "#00ff00";
+              statusMsg.textContent = "ホングダーから地球の平和は守られた！";
+              statusScore.textContent = "FINAL SCORE: " + score;
+              statusPanel.classList.remove("hidden");
+            }
+          }
+        } 
+        else {
+          for (let i = 0; i < invaders.length; i++) {
+            let inv = invaders[i];
+            if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
+              bullets.splice(bIdx, 1); 
+              bulletRemoved = true;
+              
+              inv.hp--;
+              if (inv.hp > 0) {
+                inv.hitFlash = 5; 
+                if (inv.type === "tako") inv.type = "ika"; 
+                playSound(220, 'triangle', 0.04);
+                for(let k=0; k<4; k++) {
+                  particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, life: 8, color: "#ff00ff" });
+                }
+              } else {
+                inv.alive = false;
+                
+                if (inv.type === "tako" || inv.type === "ika") score += 40; 
+                else if (inv.type === "monster") score += 30;
+                else if (inv.type === "phone") score += 20;
+                else if (inv.type === "ari") score += 15;
+                else score += 10;
+
+                scoreEl.textContent = score; 
+                playSound(140, 'sawtooth', 0.04);
+                
+                for(let k=0; k<5; k++) {
+                  particles.push({ x: inv.x + inv.width/2, y: inv.y + inv.height/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 12, color: "#ff9900" });
+                }
+                if(Math.random() < 0.15 && !powerup) powerup = { x: inv.x + inv.width/2, y: inv.y };
+              }
+              break;
+            }
           }
         }
+
         if (bulletRemoved) continue;
+
         if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
           ufo = null; bullets.splice(bIdx, 1); score += 100; scoreEl.textContent = score; playSound(480, 'sine', 0.18);
           for(let k=0; k<8; k++) particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 15, color: "#ff9900" });
         }
       }
 
-      if (aliveCount === 0 && invaders.length > 0) {
-        if(stage === 3) { 
-          gameClear = true;
-          statusTitle.textContent = "ALL STAGE CLEAR!";
-          statusTitle.style.color = "#00ff00";
-          statusMsg.textContent = "ホングダーから地球の平和は守られた！";
-          statusScore.textContent = "FINAL SCORE: " + score;
-          statusPanel.classList.remove("hidden");
-        } else {
+      if (stage < 3) {
+        let aliveCount = 0;
+        invaders.forEach(inv => { if (inv.alive) aliveCount++; });
+        if (aliveCount === 0 && invaders.length > 0) {
           stage++; 
           player.mode = 'single'; 
           initLevel(); 
@@ -576,9 +673,11 @@
       ctx.fillStyle = "#ffffff";
       stars.forEach(st => ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8));
 
-      ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-      ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath();
-      ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
+      if (stage < 3) {
+        ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+        ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath();
+        ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
+      }
 
       if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
         ctx.fillStyle = "#00ff00"; ctx.fillRect(player.x, player.y, player.width, player.height);
@@ -597,16 +696,40 @@
       if(powerup) ctx.fillText("👑", powerup.x, powerup.y);
       if(ufo) ctx.fillText("🛸", ufo.x + ufo.width/2, ufo.y);
 
-      invaders.forEach(inv => {
-        if (inv.alive) {
-          ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
-          if (inv.type === "tako") ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
-          else if (inv.type === "monster") ctx.fillText("👾", inv.x + inv.width / 2, inv.y); 
-          else if (inv.type === "phone") ctx.fillText("📱", inv.x + inv.width / 2, inv.y);   
-          else if (inv.type === "ari") ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
-          else ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
+      if (stage === 3 && boss) {
+        if (!(boss.hitFlash > 0 && Math.floor(boss.hitFlash / 2) % 2 === 0)) {
+          ctx.font = "52px sans-serif"; 
+          ctx.fillText("🐜", boss.x + boss.width / 2, boss.y + boss.height / 2);
         }
-      });
+
+        let gaugeW = 160;
+        let gaugeH = 6;
+        let gx = (canvas.width - gaugeW) / 2;
+        let gy = 24; 
+        
+        ctx.fillStyle = "#333";
+        ctx.fillRect(gx, gy, gaugeW, gaugeH);
+        
+        let currentW = (boss.hp / boss.maxHp) * gaugeW;
+        ctx.fillStyle = "#ffcc00";
+        ctx.fillRect(gx, gy, currentW, gaugeH);
+      } 
+      else {
+        invaders.forEach(inv => {
+          if (inv.alive) {
+            if (inv.hitFlash > 0 && Math.floor(inv.hitFlash / 2) % 2 === 0) return;
+
+            ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+            
+            if (inv.type === "tako") ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
+            else if (inv.type === "ika") ctx.fillText("🦑", inv.x + inv.width / 2, inv.y); 
+            else if (inv.type === "monster") ctx.fillText("👾", inv.x + inv.width / 2, inv.y); 
+            else if (inv.type === "phone") ctx.fillText("📱", inv.x + inv.width / 2, inv.y);   
+            else if (inv.type === "ari") ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
+            else ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
+          }
+        });
+      }
     }
 
     window.addEventListener("resize", syncLayout);
