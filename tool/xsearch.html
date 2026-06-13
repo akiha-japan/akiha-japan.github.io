@@ -1,142 +1,205 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X検索ジェネレーター</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>X検索ジェネレーター</title>
 
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 10px;
-      background: #fafafa;
-    }
+<style>
+body {
+  font-family: sans-serif;
+  background: #f5f7f9;
+  margin: 0;
+  padding: 20px;
+}
 
-    h2 {
-      margin-bottom: 10px;
-    }
+.container {
+  max-width: 900px;
+  margin: auto;
+}
 
-    .box {
-      background: #fff;
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
+/* ヘッダー行（タイトル＋リンクアイコン） */
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
 
-    label {
-      font-size: 12px;
-      color: #555;
-      display: block;
-      margin-top: 8px;
-    }
+.header {
+  font-size: 20px;
+  font-weight: bold;
+}
 
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
+.icon-link {
+  font-size: 18px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #ddd;
+}
 
-    .row {
-      display: flex;
-      gap: 10px;
-    }
+.icon-link:hover {
+  background: #f0f0f0;
+}
 
-    .row > div {
-      flex: 1;
-    }
+.sub {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 15px;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+/* カード */
+.box {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
 
-    pre {
-      background: #111;
-      color: #0f0;
-      padding: 10px;
-      overflow-x: auto;
-    }
-  </style>
+.section-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 10px 0 5px;
+  color: #333;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row > div {
+  flex: 1;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn1 {
+  background: #1d9bf0;
+  color: #fff;
+}
+
+.btn2 {
+  background: #222;
+  color: #fff;
+}
+
+pre {
+  background: #111;
+  color: #0f0;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+</style>
 </head>
 
 <body>
 
-<h2>高度な検索もどき ●保守党アプリ</h2>
+<div class="container">
 
+<!-- ヘッダー -->
+<div class="header-row">
+  <div class="header">X検索ジェネレーター</div>
+
+  <a class="icon-link"
+     href="https://hoshuto-app.vercel.app/x-search"
+     target="_blank"
+     title="高度な検索もどきを開く">
+    🔗
+  </a>
+</div>
+
+<div class="sub">高度な検索もどき</div>
+
+<!-- キーワード -->
 <div class="box">
-  <label>キーワード</label>
+  <div class="section-title">キーワード</div>
   <input id="keyword" placeholder="例: what's happening" />
 
-  <label>完全一致</label>
+  <div class="section-title">完全一致</div>
   <input id="exact" placeholder="例: happy hour" />
 
-  <label>いずれか含む（スペース区切り OR）</label>
+  <div class="section-title">いずれか含む</div>
   <input id="any" placeholder="例: cats dogs" />
 
-  <label>含まない</label>
+  <div class="section-title">含まない</div>
   <input id="none" placeholder="例: spam ads" />
 
-  <label>ハッシュタグ</label>
+  <div class="section-title">ハッシュタグ</div>
   <input id="tag" placeholder="例: ThrowbackThursday" />
 </div>
 
+<!-- アカウント -->
 <div class="box">
-  <label>アカウント from</label>
-  <input id="from" placeholder="例: X" />
-
-  <label>アカウント to</label>
-  <input id="to" placeholder="例: X" />
-
-  <label>メンション</label>
-  <input id="mention" placeholder="例: SFBART" />
+  <div class="section-title">アカウント</div>
+  <input id="from" placeholder="from: X" />
+  <input id="to" placeholder="to: X" />
+  <input id="mention" placeholder="@mention" />
 </div>
 
+<!-- フィルタ -->
 <div class="box">
-  <label>返信フィルタ</label>
+  <div class="section-title">フィルター</div>
+
   <select id="replies">
-    <option value="">指定なし</option>
+    <option value="">返信フィルタなし</option>
     <option value="no">返信を除外</option>
   </select>
 
-  <label>リンクフィルタ</label>
+  <br><br>
+
   <select id="links">
-    <option value="">指定なし</option>
+    <option value="">リンクフィルタなし</option>
     <option value="yes">リンクを含む</option>
     <option value="only">リンクのみ</option>
   </select>
 </div>
 
+<!-- エンゲージメント -->
 <div class="box">
-  <label>最小返信数</label>
-  <input id="repliesMin" type="number" placeholder="例: 200" />
-
-  <label>最小いいね数</label>
-  <input id="likesMin" type="number" placeholder="例: 280" />
-
-  <label>最小リポスト数</label>
-  <input id="repostMin" type="number" placeholder="例: 100" />
+  <div class="section-title">エンゲージメント</div>
+  <input id="repliesMin" type="number" placeholder="最小返信数" />
+  <input id="likesMin" type="number" placeholder="最小いいね数" />
+  <input id="repostMin" type="number" placeholder="最小リポスト数" />
 </div>
 
+<!-- 日付 -->
 <div class="box">
-  <label>開始日 (YYYY-MM-DD)</label>
-  <input id="since" placeholder="例: 2026-05-01" />
+  <div class="section-title">日付</div>
 
-  <label>終了日 (YYYY-MM-DD)</label>
-  <input id="until" placeholder="例: 2026-06-01" />
+  <input id="since" placeholder="since: 2026-01-01" />
+  <input id="until" placeholder="until: 2026-12-31" />
 </div>
 
-<button onclick="makeQuery()">検索コマンド生成</button>
-<button onclick="searchX()">Xで検索</button>
+<!-- ボタン -->
+<button class="btn1" onclick="makeQuery()">検索コマンド生成</button>
+<button class="btn2" onclick="searchX()">Xで検索</button>
 
 <h3>生成結果</h3>
 <pre id="out"></pre>
+
+</div>
 
 <script>
 function buildQuery() {
