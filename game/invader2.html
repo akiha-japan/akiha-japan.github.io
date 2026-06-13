@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS Version 2.2 🏍️</title>
+  <title>🚀 SPACE HONGDARS Version 2.4 🏍️</title>
   <style>
     html, body {
       margin: 0;
@@ -15,7 +15,6 @@
       font-family: sans-serif;
       overflow-x: hidden;
       overflow-y: auto;
-      touch-action: none; /* スマホのブラウザスクロールを完全禁止 */
       -webkit-user-select: none;
       user-select: none;
     }
@@ -25,7 +24,7 @@
       flex-direction: column;
       align-items: center;
       width: 100%;
-      padding-bottom: 30px;
+      padding-bottom: 50px;
     }
 
     .game-title {
@@ -50,6 +49,7 @@
       background: #000;
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
       border: 1px solid #333;
+      touch-action: pan-y; 
     }
 
     #gameCanvas {
@@ -57,6 +57,7 @@
       width: 100%;
       height: 100%;
       background: #000;
+      touch-action: none; 
     }
 
     .hud {
@@ -107,7 +108,7 @@
     .info-area {
       width: 90%;
       max-width: 460px;
-      margin-top: 15px;
+      margin-top: 20px;
       box-sizing: border-box;
     }
     .instruction-box {
@@ -135,7 +136,7 @@
 
   <div class="page-wrapper">
     
-    <div class="game-title">🚀 SPACE HONGDARS Version 2.2 🏍️</div>
+    <div class="game-title">🚀 SPACE HONGDARS Version 2.4 🏍️</div>
     
     <div class="game-container">
       <div class="hud">
@@ -157,14 +158,14 @@
     <div class="info-area">
       <div class="instruction-box">
         <span style="color:#00ff00; font-weight:bold;">【操作方法】</span><br>
-        画面を左右にドラッグ（PCは左右矢印キー）で自機移動。触っている間は<span style="color:#ffff00; font-weight:bold;">弾がオート連射</span>されます！
+        ゲーム画面を左右にドラッグ（PCは左右矢印キー）で自機移動。触っている間は弾がオート連射されます。画面の外側をなぞれば上下スクロールも可能です！
       </div>
       
       <div class="instruction-box">
         <span class="strategy-title">💡 攻略ポイント</span>
         ① 敵を撃破すると、まれに豪華な <span style="font-size:1.1rem;">👑</span> が落下してきます。<br>
         ② <span style="color:#ffff00; font-weight:bold;">👑（王冠）を拾うと、攻撃が超強力な「3連ワイドショット」にパワーアップ！</span><br>
-        ③ 被弾するか、**ステージをクリアすると通常ショット（1段）に戻る**ため、各面の開幕は慎重に立ち回りましょう。
+        ③ 被弾するか、ステージをクリアすると通常ショット（1段）に戻るため、各面の開幕は慎重に立ち回りましょう。
       </div>
     </div>
 
@@ -208,6 +209,7 @@
     let invaderDirection = 1;
     let baseSpeed = 0.5; 
     let isPointerDown = false;
+    let totalInvadersInLevel = 0; // 🌟初期の敵の総数を記憶する変数
 
     function syncLayout() {
       const container = document.querySelector('.game-container');
@@ -273,13 +275,12 @@
       let spacing = 52;
       let startX = (canvas.width - ((cols - 1) * spacing + 30)) / 2;
 
-      // 5段編成（要望の 📱 と 👾 を追加）
       for (let r = 0; r < 5; r++) {
         for (let c = 0; c < cols; c++) {
           let type = "bike";
           if (r === 0) type = "tako"; 
-          if (r === 1) type = "monster"; // 👾
-          if (r === 2) type = "phone";   // 📱
+          if (r === 1) type = "monster"; 
+          if (r === 2) type = "phone";   
           if (r === 3) type = "ari";   
 
           invaders.push({
@@ -292,6 +293,7 @@
           });
         }
       }
+      totalInvadersInLevel = invaders.length; // 🌟今回の面の敵の数を保存
     }
 
     stars = [];
@@ -455,8 +457,19 @@
         if (b.y < 0 || b.x < 0 || b.x > canvas.width) bullets.splice(i, 1);
       }
 
+      // 🌟【案①：加速ロジック】現在の生存数をカウント
+      let aliveCount = 0;
+      invaders.forEach(inv => { if (inv.alive) aliveCount++; });
+
+      // 敵が減るほど速度倍率を上げる（最大で約3倍速）
+      let speedMultiplier = 1.0;
+      if (totalInvadersInLevel > 0 && aliveCount > 0) {
+        let deathRatio = (totalInvadersInLevel - aliveCount) / totalInvadersInLevel;
+        speedMultiplier = 1.0 + deathRatio * 2.0; 
+      }
+
       let shiftDown = false;
-      let currentSpeed = (baseSpeed + (stage - 1) * 0.12) * invaderDirection;
+      let currentSpeed = (baseSpeed + (stage - 1) * 0.12) * invaderDirection * speedMultiplier;
 
       invaders.forEach(inv => {
         if (!inv.alive) return;
@@ -497,7 +510,6 @@
         }
       }
 
-      // 👑 判定部分を完全にクリーンに修正（タイポ・千切れ一切なし）
       if(powerup) {
         powerup.y += 1.6;
         if(powerup.y > canvas.height) {
@@ -544,15 +556,7 @@
         }
       }
 
-      let anyInvadersAlive = false;
-      for (let i = 0; i < invaders.length; i++) {
-        if (invaders[i].alive) {
-          anyInvadersAlive = true;
-          break;
-        }
-      }
-
-      if (!anyInvadersAlive && invaders.length > 0) {
+      if (aliveCount === 0 && invaders.length > 0) {
         if(stage === 3) { 
           gameClear = true;
           statusTitle.textContent = "ALL STAGE CLEAR!";
@@ -562,7 +566,7 @@
           statusPanel.classList.remove("hidden");
         } else {
           stage++; 
-          player.mode = 'single'; // クリア時に1段に戻す仕様
+          player.mode = 'single'; 
           initLevel(); 
         }
       }
