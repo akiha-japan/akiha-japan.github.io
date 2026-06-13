@@ -152,7 +152,7 @@ pre {
   <input id="mention" placeholder="@mention" />
 </div>
 
-<!-- フィルタ -->
+<!-- フィルター -->
 <div class="box">
   <div class="section-title">フィルター</div>
 
@@ -205,7 +205,7 @@ pre {
 
 <script>
 
-// 年月日セレクト生成
+// セレクト生成（デフォ付き）
 function fillSelect(id, start, end, def) {
   const el = document.getElementById(id);
   for (let i = start; i <= end; i++) {
@@ -230,43 +230,48 @@ fillSelect("ed", 1, 31, 31);
 function buildQuery() {
   let q = "";
 
-  const keyword = keyword.value;
-  const exact = exact.value;
-  const any = any.value;
-  const none = none.value;
-  const tag = tag.value;
+  const keywordVal = document.getElementById("keyword").value;
+  const exactVal = document.getElementById("exact").value;
+  const anyVal = document.getElementById("any").value;
+  const noneVal = document.getElementById("none").value;
+  const tagVal = document.getElementById("tag").value;
 
-  const from = from.value;
-  const to = to.value;
-  const mention = mention.value;
+  const fromVal = document.getElementById("from").value;
+  const toVal = document.getElementById("to").value;
+  const mentionVal = document.getElementById("mention").value;
 
-  const replies = replies.value;
-  const links = links.value;
+  const repliesVal = document.getElementById("replies").value;
+  const linksVal = document.getElementById("links").value;
 
-  const repliesMin = repliesMin.value;
-  const likesMin = likesMin.value;
-  const repostMin = repostMin.value;
+  const repliesMinVal = document.getElementById("repliesMin").value;
+  const likesMinVal = document.getElementById("likesMin").value;
+  const repostMinVal = document.getElementById("repostMin").value;
 
-  const sy = sy.value, sm = sm.value, sd = sd.value;
-  const ey = ey.value, em = em.value, ed = ed.value;
+  const sy = document.getElementById("sy").value;
+  const sm = document.getElementById("sm").value;
+  const sd = document.getElementById("sd").value;
 
-  if (keyword) q += keyword + " ";
-  if (exact) q += `"${exact}" `;
-  if (any) q += any.split(" ").join(" OR ") + " ";
-  if (none) q += none.split(" ").map(w => "-" + w).join(" ") + " ";
-  if (tag) q += "#" + tag + " ";
+  const ey = document.getElementById("ey").value;
+  const em = document.getElementById("em").value;
+  const ed = document.getElementById("ed").value;
 
-  if (from) q += `from:${from} `;
-  if (to) q += `to:${to} `;
-  if (mention) q += `@${mention} `;
+  if (keywordVal) q += keywordVal + " ";
+  if (exactVal) q += `"${exactVal}" `;
+  if (anyVal) q += anyVal.split(" ").join(" OR ") + " ";
+  if (noneVal) q += noneVal.split(" ").map(w => "-" + w).join(" ") + " ";
+  if (tagVal) q += "#" + tagVal + " ";
 
-  if (replies === "no") q += "-filter:replies ";
-  if (links === "yes") q += "filter:links ";
-  if (links === "only") q += "filter:links ";
+  if (fromVal) q += `from:${fromVal} `;
+  if (toVal) q += `to:${toVal} `;
+  if (mentionVal) q += `@${mentionVal} `;
 
-  if (repliesMin) q += `min_replies:${repliesMin} `;
-  if (likesMin) q += `min_faves:${likesMin} `;
-  if (repostMin) q += `min_retweets:${repostMin} `;
+  if (repliesVal === "no") q += "-filter:replies ";
+  if (linksVal === "yes") q += "filter:links ";
+  if (linksVal === "only") q += "filter:links ";
+
+  if (repliesMinVal) q += `min_replies:${repliesMinVal} `;
+  if (likesMinVal) q += `min_faves:${likesMinVal} `;
+  if (repostMinVal) q += `min_retweets:${repostMinVal} `;
 
   if (sy && sm && sd) q += `since:${sy}-${sm}-${sd} `;
   if (ey && em && ed) q += `until:${ey}-${em}-${ed} `;
