@@ -63,6 +63,16 @@ p{
   padding:20px;
 }
 
+/* カテゴリセクション */
+.section-title {
+  font-size: 20px;
+  color: #38bdf8;
+  margin: 35px 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  font-weight: bold;
+}
+
 /* カード */
 .card{
   background:rgba(255,255,255,0.05);
@@ -73,6 +83,12 @@ p{
   text-decoration:none;
   color:white;
   display:block;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 /* YouTube */
@@ -137,15 +153,28 @@ footer{
 
 <div class="container">
 
+  <!-- 🛠️ TOOLカテゴリ -->
+  <div class="section-title">🔧 Tools</div>
+
   <a class="card" href="/tool/simulator.html">
     <div class="title">📊 YouTube配信 収益シミュレーター</div>
     <div class="desc">再生回数・単価で収益計算</div>
+  </a>
+
+  <!-- 【追加】ニコ生シミュレーターをYouTubeの下に配置 -->
+  <a class="card" href="/tool/simulator-nikoniko.html">
+    <div class="title">📊 ニコ生会員【蓋】配信 収益シミュレーター</div>
+    <div class="desc">有料サブスク手取り・1配信の価値を計算</div>
   </a>
 
   <a class="card" href="/tool/xsearch.html">
     <div class="title">🔍 X検索ジェネレーター</div>
     <div class="desc">高度な検索もどき（条件付きX検索）</div>
   </a>
+
+
+  <!-- 🎮 GAMEカテゴリ -->
+  <div class="section-title">🎮 Games</div>
 
   <a class="card" href="/game/invader.html">
     <div class="title">🚀 SPACE HONGDARS 🛵</div>
@@ -157,6 +186,8 @@ footer{
     <div class="desc">巨大アリ ホングダー から地球を守れ！</div>
   </a>
 
+
+  <!-- 動画エリア -->
   <div class="youtube">
     <h2>📺 ランダム🎵 The music video AI 動画</h2>
 
