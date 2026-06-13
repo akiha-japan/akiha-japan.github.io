@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS Version 2.1 🏍️</title>
+  <title>🚀 SPACE HONGDARS Version 2 🏍️</title>
   <style>
-    /* 全体のスクロールを禁止 */
+    /* 全体のスクロールや余計な挙動を完全にシャットアウト */
     html, body {
       margin: 0;
       padding: 0;
@@ -15,8 +15,8 @@
       color: #fff;
       font-family: sans-serif;
       overflow-x: hidden;
-      overflow-y: auto; /* 下の説明を読めるように縦スクロールのみ許可 */
-      touch-action: manipulation;
+      overflow-y: auto;
+      touch-action: none; /* スマホのブラウザスクロールを完全禁止 */
       -webkit-user-select: none;
       user-select: none;
     }
@@ -30,16 +30,30 @@
       padding-bottom: 30px;
     }
 
-    /* ゲームの器：PCでは480px、スマホでは横幅いっぱい */
+    /* 最上部にタイトルを表示 */
+    .game-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 15px 0 10px 0;
+      text-align: center;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #00ff00, #ffff00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(0,255,0,0.2);
+    }
+
+    /* ゲーム筐体：PCでは480px、スマホでは横幅いっぱい */
     .game-container {
       position: relative;
       width: 100%;
       max-width: 480px;
-      height: 70vh; /* 画面の高さ70%をゲーム画面にする（下に説明を収めるため） */
-      min-height: 450px;
-      max-height: 650px;
+      height: 65vh; /* 縦のバランスを最適化 */
+      min-height: 440px;
+      max-height: 600px;
       background: #000;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
+      border: 1px solid #333;
     }
 
     /* ゲームキャンバス */
@@ -68,7 +82,7 @@
     #score-board { color: #ffffff; }
     #life-board { color: #ff3366; }
 
-    /* ゲームオーバー・クリア時のシンプル通知 */
+    /* 通知パネル */
     .state-overlay {
       position: absolute;
       top: 40%;
@@ -76,7 +90,7 @@
       transform: translate(-50%, -50%);
       text-align: center;
       width: 80%;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       padding: 20px;
       border-radius: 8px;
       border: 2px solid #555;
@@ -95,7 +109,7 @@
       margin-top: 10px;
     }
 
-    /* ゲームの下に配置する説明＆攻略エリア */
+    /* 説明エリア */
     .info-area {
       width: 90%;
       max-width: 460px;
@@ -127,6 +141,8 @@
 
   <div class="page-wrapper">
     
+    <div class="game-title">🚀 SPACE HONGDARS Version 2 🛵</div>
+    
     <div class="game-container">
       <div class="hud">
         <div id="stage-board">STAGE: <span id="stage">1</span></div>
@@ -146,7 +162,7 @@
     <div class="info-area">
       <div class="instruction-box">
         <span style="color:#00ff00; font-weight:bold;">【操作方法】</span><br>
-        画面をドラッグ（PCは左右矢印キー）で自機移動。触っている間は<span style="color:#ffff00; font-weight:bold;">弾がオート連射</span>されます！残り手数の制限はありません。
+        画面を左右にドラッグ（PCは左右矢印キー）で自機移動。触っている間は<span style="color:#ffff00; font-weight:bold;">弾がオート連射</span>されます！
       </div>
       
       <div class="instruction-box">
@@ -174,7 +190,6 @@
 
     let audioCtx = null;
 
-    // 即時スタート
     let score = 0;
     let stage = 1;
     let lives = 3; 
@@ -183,7 +198,6 @@
     let invulnerableTimer = 0; 
     let autoFireTimer = 0; 
 
-    // 初値に絶対狂わない固定値を仮置き
     const player = { x: 220, y: 500, width: 35, height: 22, speed: 6, mode: 'single' };
     let deadLineY = 450; 
 
@@ -199,19 +213,17 @@
     let baseSpeed = 0.6;
     let isPointerDown = false;
 
-    // 描画サイズをコンテナの大きさに同期する（不具合が出ない安全設計）
     function syncLayout() {
       const container = document.querySelector('.game-container');
       const w = container.clientWidth || 480;
-      const h = container.clientHeight || 550;
+      const h = container.clientHeight || 500;
       
       canvas.width = w;
       canvas.height = h;
 
-      player.y = h - 60;
-      deadLineY = h - 80;
+      player.y = h - 50;
+      deadLineY = h - 70;
 
-      // 画面内に自機を収める
       if (player.x > w - player.width || player.x === 220) {
         player.x = w / 2 - player.width / 2;
       }
@@ -284,37 +296,53 @@
     }
 
     // 星背景
+    stars = [];
     for(let i=0; i<40; i++) {
-      stars.push({ x: Math.random() * 480, y: Math.random() * 650, speed: Math.random() * 1.2 + 0.4 });
+      stars.push({ x: Math.random() * 480, y: Math.random() * 600, speed: Math.random() * 1.2 + 0.4 });
     }
 
-    // ポインター（ドラッグ・タッチ）操作
-    canvas.addEventListener("pointerdown", (e) => {
-      if (gameOver || gameClear) return;
-      initAudio();
-      isPointerDown = true;
-      updatePlayerPosition(e);
-    });
-
-    window.addEventListener("pointermove", (e) => {
-      if (isPointerDown && !gameOver && !gameClear) {
-        updatePlayerPosition(e);
-      }
-    });
-
-    window.addEventListener("pointerup", () => isPointerDown = false);
-    window.addEventListener("pointercancel", () => isPointerDown = false);
-
-    function updatePlayerPosition(e) {
+    // 🌟 ガタつき修正：スマホのTouchイベントに完全最適化
+    function handlePointer(clientX) {
       const rect = canvas.getBoundingClientRect();
-      const touchX = e.clientX - rect.left;
+      const touchX = clientX - rect.left;
       player.x = touchX - player.width / 2;
       
+      // 画面端の制限
       if (player.x < 0) player.x = 0;
       if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
     }
 
-    // キーボード
+    canvas.addEventListener("touchstart", (e) => {
+      if (gameOver || gameClear) return;
+      initAudio();
+      isPointerDown = true;
+      handlePointer(e.touches[0].clientX);
+    }, { passive: true });
+
+    canvas.addEventListener("touchmove", (e) => {
+      if (isPointerDown && !gameOver && !gameClear) {
+        handlePointer(e.touches[0].clientX);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener("touchend", () => isPointerDown = false);
+    canvas.addEventListener("touchcancel", () => isPointerDown = false);
+
+    // PCマウス用のバックアップ
+    canvas.addEventListener("mousedown", (e) => {
+      if (gameOver || gameClear) return;
+      initAudio();
+      isPointerDown = true;
+      handlePointer(e.clientX);
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (isPointerDown && !gameOver && !gameClear) {
+        handlePointer(e.clientX);
+      }
+    });
+    window.addEventListener("mouseup", () => isPointerDown = false);
+
+    // PCキーボード
     let rightPressed = false;
     let leftPressed = false;
     document.addEventListener("keydown", (e) => {
@@ -350,7 +378,7 @@
     function playerHit() {
       if (invulnerableTimer > 0) return; 
       lives--;
-      player.mode = 'single'; // 被弾でシングルショットにダウン
+      player.mode = 'single'; 
       lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
 
       if (lives <= 0) {
@@ -481,19 +509,23 @@
         let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--; if(p.life <= 0) particles.splice(i, 1);
       }
 
+      // 弾の当たり判定
       for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
         let b = bullets[bIdx]; let bulletRemoved = false;
+        
         for (let i = 0; i < invaders.length; i++) {
           let inv = invaders[i];
           if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
             inv.alive = false; bullets.splice(bIdx, 1); bulletRemoved = true;
             if (inv.type === "tako") score += 30; else if (inv.type === "ari") score += 20; else score += 10;
             scoreEl.textContent = score; playSound(140, 'sawtooth', 0.04);
+            
             for(let k=0; k<5; k++) {
               particles.push({ x: inv.x + inv.width/2, y: inv.y + inv.height/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 12, color: "#ff9900" });
             }
             if(Math.random() < 0.16 && !powerup) powerup = { x: inv.x + inv.width/2, y: inv.y };
             
+            // 🌟 修正：ステージクリア判定は「王冠（powerup）」を無視して「インベーダー（invaders）」の生死だけで厳密に判定
             if (invaders.every(ind => !ind.alive)) {
               if(stage === 3) { 
                 gameClear = true;
@@ -502,7 +534,8 @@
                 statusScore.textContent = "FINAL SCORE: " + score;
                 statusPanel.classList.remove("hidden");
               } else {
-                stage++; initLevel();
+                stage++; 
+                initLevel();
               }
             }
             break;
@@ -551,10 +584,8 @@
       });
     }
 
-    // 起動処理
     window.addEventListener("resize", syncLayout);
     
-    // 開いた瞬間に即計算して配置を確定・開始する
     syncLayout();
     initLevel();
     gameLoop();
