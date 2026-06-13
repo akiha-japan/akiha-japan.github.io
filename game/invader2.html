@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🚀 SPACE HONGDARS Version 2.1 🏍️</title>
   <style>
-    /* 画面のスクロールや引っ張りを完全に防止 */
+    /* 全体のスクロールを禁止 */
     html, body {
       margin: 0;
       padding: 0;
@@ -14,29 +14,32 @@
       background: #111;
       color: #fff;
       font-family: sans-serif;
-      overflow: hidden;
-      touch-action: none;
+      overflow-x: hidden;
+      overflow-y: auto; /* 下の説明を読めるように縦スクロールのみ許可 */
+      touch-action: manipulation;
       -webkit-user-select: none;
       user-select: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    /* ゲームのコンテナ：PCでは480px、スマホでは画面いっぱいに */
+    /* ページ全体のレイアウト：中央寄せ */
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding-bottom: 30px;
+    }
+
+    /* ゲームの器：PCでは480px、スマホでは横幅いっぱい */
     .game-container {
       position: relative;
       width: 100%;
       max-width: 480px;
-      height: 100%;
-      max-height: 800px;
+      height: 70vh; /* 画面の高さ70%をゲーム画面にする（下に説明を収めるため） */
+      min-height: 450px;
+      max-height: 650px;
       background: #000;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-    }
-    @media (max-height: 800px) {
-      .game-container {
-        height: 100vh;
-      }
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
     }
 
     /* ゲームキャンバス */
@@ -47,112 +50,113 @@
       background: #000;
     }
 
-    /* スコアなどのUIを画面上部に配置 */
+    /* 上部UI情報 */
     .hud {
       position: absolute;
-      top: 15px;
+      top: 12px;
       left: 0;
       width: 100%;
       display: flex;
       justify-content: space-around;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       pointer-events: none;
-      text-shadow: 2px 2px 4px #000, -2px -2px 4px #000;
+      text-shadow: 2px 2px 3px #000;
       z-index: 10;
     }
     #stage-board { color: #00ffff; }
     #score-board { color: #ffffff; }
     #life-board { color: #ff3366; }
 
-    /* 説明・案内用のオーバーレイ幕 */
-    .overlay {
+    /* ゲームオーバー・クリア時のシンプル通知 */
+    .state-overlay {
       position: absolute;
-      top: 50%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      width: 85%;
-      background: rgba(17, 17, 17, 0.95);
+      width: 80%;
+      background: rgba(0, 0, 0, 0.85);
       padding: 20px;
-      border-radius: 12px;
-      border: 2px solid #444;
-      box-shadow: 0 0 25px rgba(0, 255, 0, 0.3);
+      border-radius: 8px;
+      border: 2px solid #555;
       z-index: 20;
+    }
+    .state-overlay h2 { margin: 0 0 10px 0; font-size: 1.6rem; }
+    .btn-retry {
+      background: #00cc00;
+      border: none;
+      color: white;
+      padding: 10px 25px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* ゲームの下に配置する説明＆攻略エリア */
+    .info-area {
+      width: 90%;
+      max-width: 460px;
+      margin-top: 15px;
       box-sizing: border-box;
     }
-    .overlay h2 { margin-top: 0; color: #00ff00; font-size: 1.5rem; letter-spacing: 1px; }
-    
     .instruction-box {
-      text-align: left;
       font-size: 0.85rem;
-      line-height: 1.5;
+      line-height: 1.6;
       color: #ccc;
-      margin: 15px 0;
       background: #222;
       padding: 12px;
       border-radius: 6px;
       border: 1px solid #333;
+      margin-bottom: 10px;
     }
-    .instruction-box p { margin: 4px 0; }
     .strategy-title {
       color: #ff9900;
       font-weight: bold;
       display: block;
-      margin-bottom: 5px;
-      border-bottom: 1px dashed #555;
-      padding-bottom: 3px;
-    }
-    
-    .btn-start {
-      background: #00cc00;
-      border: none;
-      color: white;
-      padding: 12px 35px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-      box-shadow: 0 4px 0 #00aa00;
-    }
-    .btn-start:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #00aa00;
+      margin-bottom: 4px;
+      border-bottom: 1px dashed #444;
+      padding-bottom: 2px;
     }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div class="game-container">
-    <div class="hud">
-      <div id="stage-board">STAGE: <span id="stage">1</span></div>
-      <div id="score-board">SCORE: <span id="score">0</span></div>
-      <div id="life-board">LIFE: <span id="life">❤️❤️❤️</span></div>
+  <div class="page-wrapper">
+    
+    <div class="game-container">
+      <div class="hud">
+        <div id="stage-board">STAGE: <span id="stage">1</span></div>
+        <div id="score-board">SCORE: <span id="score">0</span></div>
+        <div id="life-board">LIFE: <span id="life">❤️❤️❤️</span></div>
+      </div>
+
+      <canvas id="gameCanvas"></canvas>
+
+      <div id="status-panel" class="state-overlay hidden">
+        <h2 id="status-title">GAME OVER</h2>
+        <div id="status-score" style="margin: 10px 0; font-size: 1.2rem;"></div>
+        <button class="btn-retry" id="btn-retry">RETRY</button>
+      </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="game-overlay" class="overlay">
-      <h2 id="overlay-title">SPACE HONGDARS v2.1</h2>
-      
-      <div id="overlay-body">
-        <div class="instruction-box">
-          <p><span style="color:#00ff00; font-weight:bold;">【操作】</span> 画面をドラッグ（PCは左右矢印キー）で移動。触っている間は<span style="color:#ffff00; font-weight:bold;">自動連射</span>！</p>
-          <p><span style="color:#ff3333; font-weight:bold;">【規則】</span> 画面下の赤い防衛線を越えられたら敗北！</p>
-        </div>
-        
-        <div class="instruction-box">
-          <span class="strategy-title">💡 攻略ポイント</span>
-          <p>① 敵を撃破すると、稀に豪華な <span style="font-size:1.1rem;">👑</span> が落下してくるぞ！</p>
-          <p>② <span style="color:#ffff00; font-weight:bold;">👑（王冠）を獲得すると、攻撃が超強力な「3連ワイドショット」に変貌！</span></p>
-          <p>③ ステージが進むほど敵の猛攻が増す。最優先で 👑 を狙い、火力を最大に維持せよ！</p>
-        </div>
+    <div class="info-area">
+      <div class="instruction-box">
+        <span style="color:#00ff00; font-weight:bold;">【操作方法】</span><br>
+        画面をドラッグ（PCは左右矢印キー）で自機移動。触っている間は<span style="color:#ffff00; font-weight:bold;">弾がオート連射</span>されます！残り手数の制限はありません。
       </div>
       
-      <button class="btn-start" id="btn-action">START</button>
+      <div class="instruction-box">
+        <span class="strategy-title">💡 攻略ポイント</span>
+        ① 敵を撃破すると、まれに豪華な <span style="font-size:1.1rem;">👑</span> が落下してきます。<br>
+        ② <span style="color:#ffff00; font-weight:bold;">👑（王冠）を拾うと、攻撃が超強力な「3連ワイドショット」にパワーアップ！</span><br>
+        ③ 被弾すると通常ショットに戻るため、最優先で 👑 をキープし火力を維持するのが勝利の鍵です。
+      </div>
     </div>
+
   </div>
 
   <script>
@@ -163,14 +167,14 @@
     const lifeEl = document.getElementById("life");
     const stageBoardEl = document.getElementById("stage-board");
     
-    const overlay = document.getElementById("game-overlay");
-    const overlayTitle = document.getElementById("overlay-title");
-    const overlayBody = document.getElementById("overlay-body");
-    const btnAction = document.getElementById("btn-action");
+    const statusPanel = document.getElementById("status-panel");
+    const statusTitle = document.getElementById("status-title");
+    const statusScore = document.getElementById("status-score");
+    const btnRetry = document.getElementById("btn-retry");
 
     let audioCtx = null;
 
-    let isStarted = false;
+    // 即時スタート
     let score = 0;
     let stage = 1;
     let lives = 3; 
@@ -179,8 +183,9 @@
     let invulnerableTimer = 0; 
     let autoFireTimer = 0; 
 
-    const player = { x: 100, y: 500, width: 35, height: 22, speed: 6, mode: 'single' };
-    let deadLineY = 0; 
+    // 初値に絶対狂わない固定値を仮置き
+    const player = { x: 220, y: 500, width: 35, height: 22, speed: 6, mode: 'single' };
+    let deadLineY = 450; 
 
     let bullets = [];
     let invaders = [];
@@ -192,32 +197,25 @@
 
     let invaderDirection = 1;
     let baseSpeed = 0.6;
-
     let isPointerDown = false;
 
-    // キャンバスリサイズ処理の修正
-    function resizeCanvas() {
+    // 描画サイズをコンテナの大きさに同期する（不具合が出ない安全設計）
+    function syncLayout() {
       const container = document.querySelector('.game-container');
       const w = container.clientWidth || 480;
-      const h = container.clientHeight || 800;
+      const h = container.clientHeight || 550;
       
       canvas.width = w;
       canvas.height = h;
 
-      player.y = h - 80;
-      deadLineY = h - 100;
+      player.y = h - 60;
+      deadLineY = h - 80;
 
-      // ナンバーエラー（NaN）を防止する安全な初期位置設定
-      if (player.x === 0 || isNaN(player.x) || player.x > w) {
+      // 画面内に自機を収める
+      if (player.x > w - player.width || player.x === 220) {
         player.x = w / 2 - player.width / 2;
       }
     }
-    
-    // 初期化とリサイズ登録
-    window.addEventListener("resize", resizeCanvas);
-    // 確実にコンテナ描画が終わった段階で位置確定させる
-    window.addEventListener("DOMContentLoaded", resizeCanvas);
-    resizeCanvas();
 
     function initAudio() {
       if (!audioCtx) {
@@ -235,7 +233,7 @@
         let gain = audioCtx.createGain();
         osc.frequency.value = freq;
         osc.type = type;
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + dur);
@@ -257,7 +255,6 @@
       ufo = null;
       powerup = null;
       invaderDirection = 1;
-      player.mode = 'single'; 
 
       updateStageDisplay();
 
@@ -276,7 +273,7 @@
 
           invaders.push({
             x: startX + c * spacing,
-            y: 70 + r * 40,
+            y: 55 + r * 38,
             width: 30,
             height: 25,
             type: type,
@@ -286,27 +283,21 @@
       }
     }
 
-    // 星の初期化
-    stars = [];
-    for(let i=0; i<45; i++) {
-      stars.push({ x: Math.random() * 480, y: Math.random() * 800, speed: Math.random() * 1.5 + 0.5 });
+    // 星背景
+    for(let i=0; i<40; i++) {
+      stars.push({ x: Math.random() * 480, y: Math.random() * 650, speed: Math.random() * 1.2 + 0.4 });
     }
 
-    // タッチ・マウス操作（ゲーム開始後のみ反応するように修正）
-    window.addEventListener("pointerdown", (e) => {
-      if (!isStarted || gameOver || gameClear) return;
+    // ポインター（ドラッグ・タッチ）操作
+    canvas.addEventListener("pointerdown", (e) => {
+      if (gameOver || gameClear) return;
       initAudio();
-      
-      const rect = canvas.getBoundingClientRect();
-      if (e.clientX >= rect.left && e.clientX <= rect.right) {
-        isPointerDown = true;
-        updatePlayerPosition(e);
-      }
+      isPointerDown = true;
+      updatePlayerPosition(e);
     });
 
     window.addEventListener("pointermove", (e) => {
-      if (!isStarted || gameOver || gameClear) return;
-      if (isPointerDown) {
+      if (isPointerDown && !gameOver && !gameClear) {
         updatePlayerPosition(e);
       }
     });
@@ -323,11 +314,10 @@
       if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
     }
 
-    // PCキーボード操作
+    // キーボード
     let rightPressed = false;
     let leftPressed = false;
     document.addEventListener("keydown", (e) => {
-      if (!isStarted) return;
       initAudio();
       if (e.key === "ArrowRight") { rightPressed = true; isPointerDown = true; }
       if (e.key === "ArrowLeft") { leftPressed = true; isPointerDown = true; }
@@ -339,7 +329,6 @@
 
     function checkAutoFire() {
       if (!isPointerDown || gameOver || gameClear) return;
-
       autoFireTimer++;
       if (autoFireTimer >= 9) { 
         autoFireTimer = 0;
@@ -355,55 +344,33 @@
       } else {
         bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 0 });
       }
-      playSound(340, 'square', 0.05);
+      playSound(340, 'square', 0.04);
     }
 
     function playerHit() {
       if (invulnerableTimer > 0) return; 
-
       lives--;
+      player.mode = 'single'; // 被弾でシングルショットにダウン
       lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
 
       if (lives <= 0) {
-        triggerGameOver();
+        gameOver = true;
+        isPointerDown = false;
+        playSound(100, 'sawtooth', 0.6);
+        statusTitle.textContent = "GAME OVER";
+        statusTitle.style.color = "#ff3333";
+        statusScore.textContent = "SCORE: " + score;
+        statusPanel.classList.remove("hidden");
       } else {
         invulnerableTimer = 60; 
-        playSound(150, 'sine', 0.3);
-        for(let k=0; k<15; k++) {
-          particles.push({ x: player.x + 15, y: player.y + 10, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: "#00ffff" });
+        playSound(160, 'sine', 0.25);
+        for(let k=0; k<12; k++) {
+          particles.push({ x: player.x + 15, y: player.y + 10, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: "#00ffff" });
         }
       }
     }
 
-    function triggerGameOver() {
-      gameOver = true;
-      isPointerDown = false;
-      playSound(100, 'sawtooth', 0.6);
-      overlayTitle.textContent = "GAME OVER";
-      overlayTitle.style.color = "red";
-      overlayBody.innerHTML = "<div class='instruction-box'><p>防衛ラインが突破されたか、大破しました。</p></div><p style='font-size:1.4rem;color:#fff;font-weight:bold;margin:10px 0;'>SCORE: " + score + "</p>";
-      btnAction.textContent = "RETRY";
-      overlay.classList.remove("hidden");
-    }
-
-    function triggerGameClear() {
-      gameClear = true;
-      isPointerDown = false;
-      overlayTitle.textContent = "ALL CLEAR! 🚀";
-      overlayTitle.style.color = "#00ff00";
-      overlayBody.innerHTML = "<div class='instruction-box'><p>ホングダーから地球の平和は守られた！君こそ真の英雄だ！</p></div><p style='font-size:1.4rem;color:#fff;font-weight:bold;margin:10px 0;'>FINAL SCORE: " + score + "</p>";
-      btnAction.textContent = "PLAY AGAIN";
-      overlay.classList.remove("hidden");
-    }
-
-    // STARTボタンのクリックイベント
-    btnAction.addEventListener("click", (e) => {
-      e.stopPropagation(); // 誤作動防止
-      initAudio();
-      
-      // リサイズを強制的に走らせて座標を確定させる
-      resizeCanvas();
-      
+    function resetGame() {
       score = 0;
       stage = 1;
       lives = 3;
@@ -412,14 +379,18 @@
       bullets = [];
       enemyBullets = [];
       particles = [];
+      player.mode = 'single';
       isPointerDown = false;
-      
       scoreEl.textContent = score;
       lifeEl.textContent = "❤️❤️❤️";
-      
-      overlay.classList.add("hidden");
-      isStarted = true;
+      statusPanel.classList.add("hidden");
+      syncLayout();
       initLevel();
+    }
+
+    btnRetry.addEventListener("click", (e) => {
+      e.stopPropagation();
+      resetGame();
     });
 
     function gameLoop() {
@@ -430,21 +401,17 @@
     }
 
     function update() {
-      // 背景の星だけはタイトル画面でも動かす
       stars.forEach(st => {
         st.y += st.speed;
-        if(st.y > canvas.height) {
-          st.y = 0;
-          st.x = Math.random() * canvas.width;
-        }
+        if(st.y > canvas.height) { st.y = 0; st.x = Math.random() * canvas.width; }
       });
 
-      if (!isStarted || gameOver || gameClear) return;
+      if (gameOver || gameClear) return;
 
       if (invulnerableTimer > 0) invulnerableTimer--;
 
       if(!ufo && Math.random() < 0.003) {
-        ufo = { x: -30, y: 40, width: 30, height: 20, speed: canvas.width * 0.005 };
+        ufo = { x: -30, y: 38, width: 30, height: 20, speed: canvas.width * 0.005 };
       }
       if(ufo) {
         ufo.x += ufo.speed;
@@ -457,12 +424,8 @@
       checkAutoFire();
 
       for (let i = bullets.length - 1; i >= 0; i--) {
-        let b = bullets[i];
-        b.y -= b.speed;
-        b.x += b.vx;
-        if (b.y < 0 || b.x < 0 || b.x > canvas.width) {
-          bullets.splice(i, 1);
-        }
+        let b = bullets[i]; b.y -= b.speed; b.x += b.vx;
+        if (b.y < 0 || b.x < 0 || b.x > canvas.width) bullets.splice(i, 1);
       }
 
       let shiftDown = false;
@@ -471,113 +434,130 @@
       invaders.forEach(inv => {
         if (!inv.alive) return;
         inv.x += currentSpeed;
-        
-        if (inv.x > canvas.width - inv.width || inv.x < 0) {
-          shiftDown = true;
-        }
-        if (inv.y + inv.height >= deadLineY) {
-          triggerGameOver();
-        }
+        if (inv.x > canvas.width - inv.width || inv.x < 0) shiftDown = true;
+        if (inv.y + inv.height >= deadLineY) gameOver = true;
       });
+
+      if (gameOver) {
+        statusTitle.textContent = "GAME OVER";
+        statusTitle.style.color = "#ff3333";
+        statusScore.textContent = "SCORE: " + score;
+        statusPanel.classList.remove("hidden");
+        return;
+      }
 
       if (shiftDown) {
         invaderDirection *= -1;
-        invaders.forEach(inv => {
-          if (inv.alive) inv.y += 12; 
-        });
+        invaders.forEach(inv => { if (inv.alive) inv.y += 12; });
       }
 
       invaders.forEach(inv => {
         if (inv.alive && Math.random() < 0.0004 * stage) {
-          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.5 + stage*0.2, r: 5 });
+          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.3 + stage*0.2, r: 4.5 });
         }
       });
       if (ufo && Math.random() < 0.01) {
-        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3.5, r: 5 });
+        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3.2, r: 4.5 });
       }
 
       for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        let eb = enemyBullets[i];
-        eb.y += eb.speed;
-        if (eb.y > canvas.height) {
-          enemyBullets.splice(i, 1);
-          continue;
-        }
-
+        let eb = enemyBullets[i]; eb.y += eb.speed;
+        if (eb.y > canvas.height) { enemyBullets.splice(i, 1); continue; }
         if (eb.x + eb.r > player.x && eb.x - eb.r < player.x + player.width && 
             eb.y + eb.r > player.y && eb.y - eb.r < player.y + player.height) {
-          enemyBullets.splice(i, 1);
-          playerHit();
+          enemyBullets.splice(i, 1); playerHit();
         }
       }
 
       if(powerup) {
-        powerup.y += 1.8;
+        powerup.y += 1.6;
         if(powerup.y > canvas.height) powerup = null;
         else if(powerup.x > player.x && powerup.x < player.x + player.width && powerup.y > player.y && powerup.y < player.y + player.height) {
-          player.mode = 'wide'; 
-          powerup = null;
-          playSound(700, 'sine', 0.2); 
+          player.mode = 'wide'; powerup = null; playSound(720, 'sine', 0.2); 
         }
       }
 
       for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        if(p.life <= 0) particles.splice(i, 1);
+        let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--; if(p.life <= 0) particles.splice(i, 1);
       }
 
       for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
-        let b = bullets[bIdx];
-        let bulletRemoved = false;
-
+        let b = bullets[bIdx]; let bulletRemoved = false;
         for (let i = 0; i < invaders.length; i++) {
           let inv = invaders[i];
           if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
-            inv.alive = false;
-            bullets.splice(bIdx, 1);
-            bulletRemoved = true;
-            
-            if (inv.type === "tako") score += 30;
-            else if (inv.type === "ari") score += 20;
-            else score += 10;
-            
-            scoreEl.textContent = score;
-            playSound(150, 'sawtooth', 0.05);
-
-            for(let k=0; k<6; k++) {
-              particles.push({
-                x: inv.x + inv.width/2,
-                y: inv.y + inv.height/2,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 15,
-                color: "#ff9900"
-              });
+            inv.alive = false; bullets.splice(bIdx, 1); bulletRemoved = true;
+            if (inv.type === "tako") score += 30; else if (inv.type === "ari") score += 20; else score += 10;
+            scoreEl.textContent = score; playSound(140, 'sawtooth', 0.04);
+            for(let k=0; k<5; k++) {
+              particles.push({ x: inv.x + inv.width/2, y: inv.y + inv.height/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 12, color: "#ff9900" });
             }
-
-            if(Math.random() < 0.15 && !powerup) {
-              powerup = { x: inv.x + inv.width/2, y: inv.y };
-            }
+            if(Math.random() < 0.16 && !powerup) powerup = { x: inv.x + inv.width/2, y: inv.y };
             
-            if (invaders.every(i => !i.alive)) {
+            if (invaders.every(ind => !ind.alive)) {
               if(stage === 3) { 
-                triggerGameClear();
+                gameClear = true;
+                statusTitle.textContent = "ALL CLEAR! 🚀";
+                statusTitle.style.color = "#00ff00";
+                statusScore.textContent = "FINAL SCORE: " + score;
+                statusPanel.classList.remove("hidden");
               } else {
-                stage++;
-                initLevel();
+                stage++; initLevel();
               }
             }
             break;
           }
         }
-
         if (bulletRemoved) continue;
-
         if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
-          ufo = null;
-          bullets.splice(bIdx, 1);
-          score += 100;
-          scoreEl.textContent =
+          ufo = null; bullets.splice(bIdx, 1); score += 100; scoreEl.textContent = score; playSound(480, 'sine', 0.18);
+          for(let k=0; k<8; k++) particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 15, color: "#ff9900" });
+        }
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = "#ffffff";
+      stars.forEach(st => ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8));
+
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+      ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath();
+      ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
+
+      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
+        ctx.fillStyle = "#00ff00"; ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+
+      ctx.fillStyle = "#ffff00"; bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      enemyBullets.forEach(eb => {
+        ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff3333"; ctx.fill();
+      });
+
+      particles.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); });
+
+      ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if(powerup) ctx.fillText("👑", powerup.x, powerup.y);
+      if(ufo) ctx.fillText("🛸", ufo.x + ufo.width/2, ufo.y);
+
+      invaders.forEach(inv => {
+        if (inv.alive) {
+          ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+          if (inv.type === "tako") ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
+          else if (inv.type === "ari") ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
+          else ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
+        }
+      });
+    }
+
+    // 起動処理
+    window.addEventListener("resize", syncLayout);
+    
+    // 開いた瞬間に即計算して配置を確定・開始する
+    syncLayout();
+    initLevel();
+    gameLoop();
+  </script>
+</body>
+</html>
