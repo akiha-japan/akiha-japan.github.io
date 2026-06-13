@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🚀 SPACE HONGDARS Version 2 🏍️</title>
+  <style>
+    /* 画面のスクロールや引っ張りを完全に防止し、全画面アプリのように仕立てる */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: sans-serif;
+      overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ゲーム画面をブラウザいっぱいに表示 */
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    /* スコアなどのUIを画面上部に浮かせる（ゲーム画面に被せる） */
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      font-size: 1rem;
+      font-weight: bold;
+      pointer-events: none; /* UIの下をタップできるようにスルーさせる */
+      text-shadow: 2px 2px 4px #000, -2px -2px 4px #000; /* 黒背景で見やすく */
+      z-index: 10;
+    }
+    #stage-board { color: #00ffff; }
+    #score-board { color: #ffffff; }
+    #life-board { color: #ff3366; }
+
+    /* ゲーム開始前・終了時のオーバーレイ案内幕 */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 85%;
+      max-width: 400px;
+      background: rgba(17, 17, 17, 0.85);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #444;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+      z-index: 20;
+    }
+    .overlay h2 { margin-top: 0; color: #00ff00; font-size: 1.6rem; }
+    .overlay p { font-size: 0.9rem; line-height: 1.6; color: #ccc; margin: 10px 0; }
+    .overlay .btn-start {
+      background: #00cc00;
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      box-shadow: 0 4px 0 #00aa00;
+    }
+    .overlay .btn-start:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #00aa00;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="hud">
+    <div id="stage-board">STAGE: <span id="stage">1</span></div>
+    <div id="score-board">SCORE: <span id="score">0</span></div>
+    <div id="life-board">LIFE: <span id="life">❤️❤️❤️</span></div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="game-overlay" class="overlay">
+    <h2 id="overlay-title">SPACE HONGDARS v2</h2>
+    <div id="overlay-body">
+      <p><span style="color:#00ff00; font-weight:bold;">【操作方法】</span><br>画面をスライド（ドラッグ）して自機を移動！<br>触っている間は<span style="color:#ffff00; font-weight:bold;">自動で連射</span>されます。</p>
+      <p><span style="color:#ff3333; font-weight:bold;">【防衛指令】</span><br>画面下の赤い防衛線を越えられたら敗北！</p>
+    </div>
+    <button class="btn-start" id="btn-action">START</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const stageEl = document.getElementById("stage");
+    const lifeEl = document.getElementById("life");
+    const stageBoardEl = document.getElementById("stage-board");
+    
+    const overlay = document.getElementById("game-overlay");
+    const overlayTitle = document.getElementById("overlay-title");
+    const overlayBody = document.getElementById("overlay-body");
+    const btnAction = document.getElementById("btn-action");
+
+    let audioCtx = null;
+
+    // ゲーム状態管理
+    let isStarted = false;
+    let score = 0;
+    let stage = 1;
+    let lives = 3; 
+    let gameOver = false;
+    let gameClear = false;
+    let invulnerableTimer = 0; 
+    let autoFireTimer = 0; // オート連射用ウェイトカウンター
+
+    // 自機データ
+    const player = { x: 0, y: 0, width: 35, height: 22, speed: 6, mode: 'single' };
+    let deadLineY = 0; // 画面サイズに応じて可変
+
+    let bullets = [];
+    let invaders = [];
+    let particles = [];
+    let stars = [];
+    let enemyBullets = [];
+    let ufo = null;
+    let powerup = null;
+
+    let invaderDirection = 1;
+    let baseSpeed = 0.6;
+
+    // タッチ・マウス移動のフラグ
+    let isPointerDown = false;
+    let targetX = 0;
+
+    // 🌟 完全レスポンシブ対応：リサイズ処理
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // 画面サイズに応じて自機のY位置と防衛ラインを再計算
+      player.y = canvas.height - 80;
+      deadLineY = canvas.height - 100;
+
+      // 初回リサイズ時に自機を中央へ
+      if (!isStarted && player.x === 0) {
+        player.x = canvas.width / 2 - player.width / 2;
+      }
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas(); // 初回実行
+
+    // オーディオ初期化
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(freq, type, dur) {
+      if (!audioCtx) return;
+      try {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.type = type;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    function updateStageDisplay() {
+      if (stage === 3) {
+        stageBoardEl.innerHTML = "<span style='color:#ff3333;'>LAST STAGE</span>";
+      } else {
+        stageBoardEl.innerHTML = "STAGE: <span>" + stage + "</span>";
+      }
+    }
+
+    // 🌟 画面幅に合わせてインベーダーの配置個数を柔軟に変える
+    function initLevel() {
+      invaders = [];
+      bullets = [];
+      enemyBullets = [];
+      ufo = null;
+      powerup = null;
+      invaderDirection = 1;
+      player.mode = 'single'; 
+
+      updateStageDisplay();
+
+      // 画面横幅に応じて配置列数を決定（最小4列、最大8列程度に自動調整）
+      let cols = Math.floor(canvas.width / 60);
+      if (cols < 4) cols = 4;
+      if (cols > 8) cols = 8;
+      
+      // 中央寄せにするための初期オフセット計算
+      let spacing = 50;
+      let startX = (canvas.width - ((cols - 1) * spacing + 30)) / 2;
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < cols; c++) {
+          let type = "bike";
+          if (r === 0) type = "tako";
+          if (r === 1) type = "ari";
+
+          invaders.push({
+            x: startX + c * spacing,
+            y: 60 + r * 40,
+            width: 30,
+            height: 25,
+            type: type,
+            alive: true
+          });
+        }
+      }
+    }
+
+    // 背景の星を生成
+    for(let i=0; i<50; i++) {
+      stars.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, speed: Math.random() * 1.5 + 0.5 });
+    }
+
+    // 🌟 操作システム：ポインター（タッチ＆マウス）イベント
+    window.addEventListener("pointerdown", (e) => {
+      initAudio();
+      if (!isStarted) return;
+      isPointerDown = true;
+      updatePlayerPosition(e);
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (!isStarted || gameOver || gameClear) return;
+      if (isPointerDown) {
+        updatePlayerPosition(e);
+      }
+    });
+
+    window.addEventListener("pointerup", () => isPointerDown = false);
+    window.addEventListener("pointercancel", () => isPointerDown = false);
+
+    function updatePlayerPosition(e) {
+      // 指の場所に自機を滑らかに追従、またはダイレクト移動
+      player.x = e.clientX - player.width / 2;
+      // 画面外はみ出し防止
+      if (player.x < 0) player.x = 0;
+      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+    }
+
+    // PC用キーボード操作も残す（ハイブリッド対応）
+    let rightPressed = false;
+    let leftPressed = false;
+    document.addEventListener("keydown", (e) => {
+      initAudio();
+      if (e.key === "ArrowRight") { rightPressed = true; isPointerDown = true; }
+      if (e.key === "ArrowLeft") { leftPressed = true; isPointerDown = true; }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowRight") { rightPressed = false; if(!leftPressed) isPointerDown = false; }
+      if (e.key === "ArrowLeft") { leftPressed = false; if(!rightPressed) isPointerDown = false; }
+    });
+
+    // 🌟 オート連射処理（制限なし）
+    function checkAutoFire() {
+      if (!isPointerDown || gameOver || gameClear) return;
+
+      autoFireTimer++;
+      // 10フレームに1回発射（約0.16秒間隔。数値を小さくすると超高速連射になります）
+      if (autoFireTimer >= 10) {
+        autoFireTimer = 0;
+        fireBullet();
+      }
+    }
+
+    function fireBullet() {
+      if (player.mode === 'wide') {
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: -1.5 });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 0 });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 1.5 });
+      } else {
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10, speed: 8, vx: 0 });
+      }
+      playSound(300, 'square', 0.06);
+    }
+
+    function playerHit() {
+      if (invulnerableTimer > 0) return; 
+
+      lives--;
+      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+
+      if (lives <= 0) {
+        triggerGameOver();
+      } else {
+        invulnerableTimer = 60; 
+        playSound(150, 'sine', 0.3);
+        for(let k=0; k<15; k++) {
+          particles.push({ x: player.x + 15, y: player.y + 10, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: "#00ffff" });
+        }
+      }
+    }
+
+    function triggerGameOver() {
+      gameOver = true;
+      playSound(100, 'sawtooth', 0.6);
+      overlayTitle.textContent = "GAME OVER";
+      overlayTitle.style.color = "red";
+      overlayBody.innerHTML = "<p>防衛ラインが突破されたか、大破しました。</p><p style='font-size:1.3rem;color:#fff;'>SCORE: " + score + "</p>";
+      btnAction.textContent = "RETRY";
+      overlay.classList.remove("hidden");
+    }
+
+    function triggerGameClear() {
+      gameClear = true;
+      overlayTitle.textContent = "ALL CLEAR! 🚀";
+      overlayTitle.style.color = "#00ff00";
+      overlayBody.innerHTML = "<p>ホングダーから地球の平和は守られた！</p><p style='font-size:1.3rem;color:#fff;'>FINAL SCORE: " + score + "</p>";
+      btnAction.textContent = "PLAY AGAIN";
+      overlay.classList.remove("hidden");
+    }
+
+    // ボタンクリックでゲーム開始・リトライ
+    btnAction.addEventListener("click", () => {
+      initAudio();
+      overlay.classList.add("hidden");
+      
+      // ゲーム変数の初期化
+      score = 0;
+      stage = 1;
+      lives = 3;
+      gameOver = false;
+      gameClear = false;
+      bullets = [];
+      enemyBullets = [];
+      particles = [];
+      scoreEl.textContent = score;
+      lifeEl.textContent = "❤️❤️❤️";
+      
+      isStarted = true;
+      initLevel();
+    });
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (isStarted) {
+        update();
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+      if (gameOver || gameClear) return;
+
+      if (invulnerableTimer > 0) invulnerableTimer--;
+
+      // 星のスクロール（画面下端を越えたら上に戻す）
+      stars.forEach(st => {
+        st.y += st.speed;
+        if(st.y > canvas.height) {
+          st.y = 0;
+          st.x = Math.random() * canvas.width;
+        }
+      });
+
+      // UFO出現処理（画面幅依存に修正）
+      if(!ufo && Math.random() < 0.003) {
+        ufo = { x: -30, y: 35, width: 30, height: 20, speed: canvas.width * 0.004 };
+      }
+      if(ufo) {
+        ufo.x += ufo.speed;
+        if(ufo.x > canvas.width) ufo = null;
+      }
+
+      // キーボード移動の処理（タッチ時はpointermove側で更新されるため不要）
+      if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
+      if (leftPressed && player.x > 0) player.x -= player.speed;
+
+      // オート連射監視
+      checkAutoFire();
+
+      // 自機の弾更新
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i];
+        b.y -= b.speed;
+        b.x += b.vx;
+        if (b.y < 0 || b.x < 0 || b.x > canvas.width) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // インベーダー移動
+      let shiftDown = false;
+      let currentSpeed = (baseSpeed + (stage - 1) * 0.15) * invaderDirection;
+
+      invaders.forEach(inv => {
+        if (!inv.alive) return;
+        inv.x += currentSpeed;
+        
+        if (inv.x > canvas.width - inv.width || inv.x < 0) {
+          shiftDown = true;
+        }
+        if (inv.y + inv.height >= deadLineY) {
+          triggerGameOver();
+        }
+      });
+
+      if (shiftDown) {
+        invaderDirection *= -1;
+        invaders.forEach(inv => {
+          if (inv.alive) inv.y += 12; 
+        });
+      }
+
+      // 敵の攻撃
+      invaders.forEach(inv => {
+        if (inv.alive && Math.random() < 0.0004 * stage) {
+          enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.5 + stage*0.2, r: 5 });
+        }
+      });
+      if (ufo && Math.random() < 0.01) {
+        enemyBullets.push({ x: ufo.x + ufo.width/2, y: ufo.y + ufo.height, speed: 3.5, r: 5 });
+      }
+
+      // 敵の弾更新
+      for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        let eb = enemyBullets[i];
+        eb.y += eb.speed;
+        if (eb.y > canvas.height) {
+          enemyBullets.splice(i, 1);
+          continue;
+        }
+
+        if (eb.x + eb.r > player.x && eb.x - eb.r < player.x + player.width && 
+            eb.y + eb.r > player.y && eb.y - eb.r < player.y + player.height) {
+          enemyBullets.splice(i, 1);
+          playerHit();
+        }
+      }
+
+      // パワーアップアイテム更新
+      if(powerup) {
+        powerup.y += 1.8;
+        if(powerup.y > canvas.height) powerup = null;
+        else if(powerup.x > player.x && powerup.x < player.x + player.width && powerup.y > player.y && powerup.y < player.y + player.height) {
+          player.mode = 'wide'; 
+          powerup = null;
+          playSound(600, 'sine', 0.15);
+        }
+      }
+
+      // パーティクル更新
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        if(p.life <= 0) particles.splice(i, 1);
+      }
+
+      // 当たり判定（逆順）
+      for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
+        let b = bullets[bIdx];
+        let bulletRemoved = false;
+
+        for (let i = 0; i < invaders.length; i++) {
+          let inv = invaders[i];
+          if (inv.alive && b.x > inv.x && b.x < inv.x + inv.width && b.y > inv.y && b.y < inv.y + inv.height) {
+            inv.alive = false;
+            bullets.splice(bIdx, 1);
+            bulletRemoved = true;
+            
+            if (inv.type === "tako") score += 30;
+            else if (inv.type === "ari") score += 20;
+            else score += 10;
+            
+            scoreEl.textContent = score;
+            playSound(150, 'sawtooth', 0.05);
+
+            for(let k=0; k<6; k++) {
+              particles.push({
+                x: inv.x + inv.width/2,
+                y: inv.y + inv.height/2,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 15,
+                color: "#ff9900"
+              });
+            }
+
+            if(Math.random() < 0.15 && !powerup) {
+              powerup = { x: inv.x + inv.width/2, y: inv.y };
+            }
+            
+            if (invaders.every(i => !i.alive)) {
+              if(stage === 3) { 
+                triggerGameClear();
+              } else {
+                stage++;
+                initLevel();
+              }
+            }
+            break;
+          }
+        }
+
+        if (bulletRemoved) continue;
+
+        if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
+          ufo = null;
+          bullets.splice(bIdx, 1);
+          score += 100;
+          scoreEl.textContent = score;
+          playSound(500, 'sine', 0.2);
+          for(let k=0; k<10; k++) {
+            particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 20, color: "#ff9900" });
+          }
+        }
+      }
+    }
+
+    function draw() {
+      // 1. 星空
+      ctx.fillStyle = "#ffffff";
+      stars.forEach(st => {
+        ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8);
+      });
+
+      // ゲーム開始前は背景のみ描画
+      if (!isStarted) return;
+
+      // 2. 防衛ライン（画面下部）
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]); 
+      ctx.beginPath();
+      ctx.moveTo(0, deadLineY);
+      ctx.lineTo(canvas.width, deadLineY);
+      ctx.stroke();
+      ctx.setLineDash([]); 
+
+      // 3. 自機（無敵時の点滅処理）
+      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
+        ctx.fillStyle = "#00ff00";
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+
+      // 4. 自機の弾
+      ctx.fillStyle = "#ffff00";
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      // 5. 敵の弾
+      enemyBullets.forEach(eb => {
+        ctx.beginPath();
+        ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff3333";
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = "#ff0000";
+        ctx.fill();
+        ctx.shadowBlur = 0; 
+      });
+
+      // 6. 爆発エフェクト
+      particles.forEach(p => {
+        ctx.fillStyle = p.color || "#ff9900";
+        ctx.fillRect(p.x, p.y, 2, 2);
+      });
+
+      // 7. パワーアップ
+      if(powerup) {
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("⚡", powerup.x, powerup.y);
+      }
+
+      // 8. UFO🛸
+      if(ufo) {
+        ctx.font = "24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("🛸", ufo.x + ufo.width/2, ufo.y);
+      }
+
+      // 9. インベーダーたち
+      invaders.forEach(inv => {
+        if (inv.alive) {
+          ctx.font = "24px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          
+          if (inv.type === "tako") {
+            ctx.fillText("🐙", inv.x + inv.width / 2, inv.y);
+          } else if (inv.type === "ari") {
+            ctx.fillText("🐜", inv.x + inv.width / 2, inv.y);
+          } else {
+            ctx.fillText("🏍️", inv.x + inv.width / 2, inv.y);
+          }
+        }
+      });
+    }
+
+    // ループ自体は背景アニメーションのために即時開始
+    gameLoop();
+  </script>
+</body>
+</html>
