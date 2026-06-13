@@ -1,0 +1,334 @@
+<!-- 
+  ==================================================================
+  【導入文テキスト修正版】ニコ生会員【蓋】配信 収益シミュレーター一式
+  ==================================================================
+-->
+
+<div class="yt-main-wrapper">
+
+  <!-- ① 【上】導入テキスト（ご指定の文章に完全修正） -->
+  <div class="yt-calc-intro-top">
+    <p>
+      多くの視聴者を集めるネット政治・ニュース論壇において、YouTubeの規制リスクを回避しつつ<strong>【蓋】</strong>をしてコアなファンと深く繋がる場となっている<strong>「ニコ生チャンネル（有料会員制）」（例として「百田尚樹チャンネル」など）</strong>。その正確な月間収益や手取り額は公式には<strong>非公開（不明）</strong>ですが、ドワンゴが規定する公式の分配規約（二重手数料の構造）や会員データから、そのリアルな収益構造をロジカルに予測・シミュレーションすることができます。
+    </p>
+  </div>
+
+  <!-- ② 【中】ニコ生シミュレーター本体 -->
+  <div class="yt-calc-container">
+    <h2 class="yt-calc-title">📊 ニコ生会員【蓋】配信 収益シミュレーター</h2>
+    <p class="yt-calc-subtitle">月額サブスクのリアルな固定手取りと、1配信あたりの労働単価を可視化します</p>
+
+    <!-- 入力フォームエリア -->
+    <div class="yt-calc-form">
+      <div class="yt-calc-group">
+        <label for="calc-members">有料会員数: <span id="val-members">30,000</span> 人</label>
+        <input type="range" id="calc-members" min="5000" max="50000" step="1000" value="30000">
+      </div>
+
+      <div class="yt-calc-group">
+        <label for="calc-price">月額会費（税込）: <span id="val-price">880</span> 円</label>
+        <input type="range" id="calc-price" min="550" max="1100" step="110" value="880">
+      </div>
+
+      <!-- コスト換算用の独立したスライダー -->
+      <div class="yt-calc-group link-free-box">
+        <label for="calc-streams">（参考）月間の「蓋」配信回数: <span id="val-streams">4</span> 回</label>
+        <p class="calc-note">※サブスクのため、配信回数を増減させても月間の手取り総額は変わりません</p>
+        <input type="range" id="calc-streams" min="1" max="30" step="1" value="4">
+      </div>
+    </div>
+
+    <!-- 計算結果表示エリア -->
+    <div class="yt-calc-results">
+      <div class="yt-calc-card">
+        <div class="yt-card-label">月間 会員売上（額面）</div>
+        <div class="yt-card-value" id="result-gross">¥0</div>
+      </div>
+      <div class="yt-calc-card">
+        <div class="yt-card-label">実質手数料（約29.8%）</div>
+        <div class="yt-card-value fee-color" id="result-fee">¥0</div>
+      </div>
+      
+      <!-- 固定収入カード -->
+      <div class="yt-calc-card total-card">
+        <div class="yt-card-label">🛡️ 配信者の月間固定手取り（配信回数に関わらず毎月確定）</div>
+        <div class="yt-card-value" id="result-monthly-net">¥0</div>
+      </div>
+      
+      <!-- 1本あたり換算カード -->
+      <div class="yt-calc-card per-stream-card">
+        <div class="yt-card-label">⏳ 1配信（蓋）あたりの労働単価換算</div>
+        <div class="yt-card-value" id="result-per-stream">¥0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 【下】根拠・使い方テキスト -->
+  <div class="yt-calc-intro-bottom">
+    <h3>📈 シミュレーションの初期設定（デフォルト値）の根拠</h3>
+    <p>
+      当ツールでは、有料会員数3万人を誇る大規模運営をベースに、ニコニコチャンネル公式の規約に則った二重手数料ロジックを正確に組み込んでいます。
+    </p>
+
+    <ul>
+      <li>
+        <strong>有料会員数（30,000人）と月額（880円）：</strong><br>
+        時事・政治ジャンルにおける国内最大規模のチャンネルデータに基づき、デフォルト値を設定しています。会員制のため、配信頻度に関わらず毎月安定した固定収入（サブスクリプション）のベースとなります。
+      </li>
+      <li>
+        <strong>二重手数料の仕組み（実質約30%）：</strong><br>
+        ニコニコチャンネルの分配は、全体の売上から「まず事務・決済手数料14%＋消費税（計15.4%）」を差し引き、その残額の「83%」が配信者に支払われる契約構造（ドワンゴの取り分）になっています。逆算すると、<strong>総売上の約29.8%が手数料として引かれる</strong>計算になり、当シミュレーターはこのリアルな手取り率（約70.2%）を完全に再現しています。
+      </li>
+      <li>
+        <strong>1配信（蓋）あたりの価値：</strong><br>
+        「月間手取り額」を「月の配信回数」で割ることで、YouTubeからニコ生会員限定（蓋）に切り替えた際、1本あたりの生放送がどれほどの経済的価値（サブスク維持効果）を生み出しているかを可視化します。
+      </li>
+    </ul>
+
+    <div class="yt-calc-usage-box">
+      <strong>【検証・シミュレーターの使い方】</strong><br>
+      スライダーを動かすことで、「もし会員数がさらに増えたら？」「配信特番の回数を増やして1本あたりの密度を上げたら？」など、条件に応じたリアルタイムの収益予測値を自由に出すことができます。
+    </div>
+  </div>
+
+</div>
+
+<!-- 
+  ==================================================================
+  専用デザイン（CSS）
+  ==================================================================
+-->
+<style>
+  .yt-main-wrapper {
+    max-width: 600px;
+    width: 92%;
+    margin: 30px auto;
+    font-family: sans-serif;
+    color: #333;
+    box-sizing: border-box;
+  }
+  .yt-main-wrapper *, .yt-main-wrapper *::before, .yt-main-wrapper *::after {
+    box-sizing: inherit;
+  }
+
+  .yt-calc-intro-top {
+    line-height: 1.7;
+    margin-bottom: 25px;
+  }
+  .yt-calc-intro-top p {
+    margin: 0 0 15px 0;
+  }
+
+  .yt-calc-container {
+    width: 100%;
+    padding: 25px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+  }
+  .yt-calc-title {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.4rem;
+    color: #1a1a1a;
+    text-align: center;
+  }
+  .yt-calc-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  .yt-calc-form {
+    margin-bottom: 25px;
+  }
+  .yt-calc-group {
+    margin-bottom: 20px;
+  }
+  .yt-calc-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  .yt-calc-group label span {
+    color: #cc0033;
+    font-size: 1.1rem;
+  }
+  .link-free-box {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px dashed #ddd;
+  }
+  .calc-note {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #777;
+  }
+  .yt-calc-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    outline: none;
+  }
+  .yt-calc-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .yt-calc-card {
+    background: #f5f7fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e6ebf4;
+  }
+  .fee-color {
+    color: #c0392b !important;
+  }
+  .total-card {
+    grid-column: span 2;
+    background: #eef9f0;
+    border: 1px solid #cceed4;
+  }
+  .per-stream-card {
+    grid-column: span 2;
+    background: #fcf8e3;
+    border: 1px solid #faebcc;
+  }
+  .yt-card-label {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .yt-card-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #111;
+  }
+  .total-card .yt-card-value {
+    font-size: 1.7rem;
+    color: #27ae60;
+  }
+  .per-stream-card .yt-card-value {
+    font-size: 1.5rem;
+    color: #b44512;
+  }
+
+  .yt-calc-intro-bottom {
+    line-height: 1.7;
+    margin-top: 25px;
+  }
+  .yt-calc-intro-bottom h3 {
+    font-size: 1.1rem;
+    border-left: 4px solid #cc0033;
+    padding-left: 10px;
+    margin: 0 0 15px 0;
+    color: #1a1a1a;
+  }
+  .yt-calc-intro-bottom p {
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+  }
+  .yt-calc-intro-bottom ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  .yt-calc-intro-bottom li {
+    margin-bottom: 10px;
+  }
+  .yt-calc-usage-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border: 1px solid #eee;
+    color: #555;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 480px) {
+    .yt-main-wrapper {
+      margin: 15px auto;
+    }
+    .yt-calc-container {
+      padding: 15px;
+    }
+    .yt-calc-title {
+      font-size: 1.2rem;
+    }
+    .yt-calc-results { 
+      grid-template-columns: 1fr; 
+    }
+    .total-card, .per-stream-card { 
+      grid-column: span 1; 
+    }
+  }
+</style>
+
+<!-- 
+  ==================================================================
+  リアルタイム連動 計算プログラム
+  ==================================================================
+-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const mInput = document.getElementById('calc-members');
+    const pInput = document.getElementById('calc-price');
+    const sInput = document.getElementById('calc-streams');
+
+    const mVal = document.getElementById('val-members');
+    const pVal = document.getElementById('val-price');
+    const sVal = document.getElementById('val-streams');
+
+    const resGross = document.getElementById('result-gross');
+    const resFee = document.getElementById('result-fee');
+    const resMonthlyNet = document.getElementById('result-monthly-net');
+    const resPerStream = document.getElementById('result-per-stream');
+
+    function updateCalculations() {
+      const members = parseInt(mInput.value) || 0;
+      const price = parseInt(pInput.value) || 0;
+      const streams = parseInt(sInput.value) || 1;
+
+      // スライダー数値をテキストに反映
+      mVal.textContent = members.toLocaleString();
+      pVal.textContent = price.toLocaleString();
+      sVal.textContent = streams.toLocaleString();
+
+      // 1. 売上総額（額面）
+      const gross = members * price;
+
+      // 2. 第一段階：決済・事務手数料（14% + 消費税10% = 15.4%）
+      const firstStageFee = Math.round(gross * 0.154);
+      const remaining = gross - firstStageFee;
+
+      // 3. 第二段階：ドワンゴと分配（残った額の83%が配信者の手取り）
+      const monthlyNet = Math.round(remaining * 0.83);
+
+      // 4. 実質引かれた総手数料額
+      const totalFee = gross - monthlyNet;
+
+      // 5. 1配信あたりの労働単価換算（月間手取り ÷ 配信回数）
+      const perStreamValue = Math.round(monthlyNet / streams);
+
+      // 結果を画面に反映
+      resGross.textContent = '¥' + gross.toLocaleString();
+      resFee.textContent = '¥' + totalFee.toLocaleString();
+      resMonthlyNet.textContent = '¥' + monthlyNet.toLocaleString();
+      resPerStream.textContent = '¥' + perStreamValue.toLocaleString();
+    }
+
+    mInput.addEventListener('input', updateCalculations);
+    pInput.addEventListener('input', updateCalculations);
+    sInput.addEventListener('input', updateCalculations);
+
+    // 最初の一回を実行
+    updateCalculations();
+  });
+</script>
