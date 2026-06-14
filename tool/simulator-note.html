@@ -1,0 +1,478 @@
+<div class="note-main-wrapper">
+
+  <div class="note-calc-intro-top">
+    <p>
+      noteで有料記事や定期購読マガジンを運営するクリエイターの収益構造をロジカルに分析します。
+      知りたい目的に合わせて、下記のタブで計算画面を完全に切り離してシミュレーションできます。
+    </p>
+  </div>
+
+  <div class="note-tabs">
+    <button id="tab-btn-single" class="note-tab-btn active" onclick="switchNoteTab('single')">📰 記事1本の売上逆算</button>
+    <button id="tab-btn-monthly" class="note-tab-btn" onclick="switchNoteTab('monthly')">💰 月間の総利益予測</button>
+  </div>
+
+  <div class="note-calc-container">
+    
+    <div id="note-pane-single" class="note-pane active">
+      <h2 class="note-calc-title">📊 note有料記事 1本の収益逆算</h2>
+      <p class="note-calc-subtitle">記事最下部の「高評価数」から、その1本が生み出したスポット売上を逆算します</p>
+
+      <div class="note-calc-form">
+        <div class="note-calc-group">
+          <label for="note-calc-likes">記事への高評価数（星マーク数）: <span id="note-val-likes">450</span> 人</label>
+          <input type="range" id="note-calc-likes" min="10" max="2000" step="10" value="450">
+        </div>
+
+        <div class="note-calc-group">
+          <label for="note-calc-action-rate">高評価を押した人の割合（アクティブ率）: <span id="note-val-action-rate">70</span> %</label>
+          <input type="range" id="note-calc-action-rate" min="30" max="100" step="5" value="70">
+        </div>
+
+        <div class="note-calc-group">
+          <label for="note-calc-single-ratio">読者のうち「単品購入」の割合: <span id="note-val-single-ratio">20</span> %</label>
+          <input type="range" id="note-calc-single-ratio" min="0" max="100" step="5" value="20">
+        </div>
+        
+        <div class="note-calc-group-info">
+          <span>※ 残りの <strong id="note-val-mag-ratio">80</strong>% は月額マガジンでの閲覧者と仮定（単品価格: 300円）</span>
+        </div>
+      </div>
+
+      <div class="note-calc-results">
+        <div class="note-calc-card">
+          <div class="note-card-label">想定される総読者数</div>
+          <div class="note-card-value" id="note-result-readers">0 人</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">単品購入者数（300円/本）</div>
+          <div class="note-card-value" id="note-result-single-count">0 人</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">この記事の単品売上（額面）</div>
+          <div class="note-card-value" id="note-result-single-gross">¥0</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">単品分のサービス利用料（約14.5%引）</div>
+          <div class="note-card-value" id="note-result-single-fee">-¥0</div>
+        </div>
+        <div class="note-card-shadow-box total-card">
+          <div class="note-card-label">💰 この記事1本からの単品手取り（予測）</div>
+          <div class="note-card-value" id="note-result-total">¥0</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="note-pane-monthly" class="note-pane">
+      <h2 class="note-calc-title">📊 月間の総収益（利益）予測</h2>
+      <p class="note-calc-subtitle">月額マガジン固定収入 ＋ 有料記事の月間総売上 から月収益を算出します</p>
+
+      <div class="note-calc-form">
+        <div class="note-calc-group">
+          <label for="note-calc-mag-members">月額マガジン 総購読者数: <span id="note-val-mag-members">1,000</span> 人</label>
+          <input type="range" id="note-calc-mag-members" min="0" max="5000" step="50" value="1000">
+        </div>
+        <div class="note-calc-group-info" style="margin-top:-15px; margin-bottom:15px;">
+          <span>※ 月額 <strong>770円</strong> で計算（プラットフォーム料20%＋決済5%）</span>
+        </div>
+
+        <div class="note-calc-group">
+          <label for="note-calc-m-single-price">有料記事 単品価格（1本あたり）: <span id="note-val-m-single-price">300</span> 円</label>
+          <input type="range" id="note-calc-m-single-price" min="100" max="1000" step="50" value="300">
+        </div>
+
+        <div class="note-calc-group">
+          <label for="note-calc-m-single-count">1記事あたりの平均単品販売数: <span id="note-val-m-single-count">20</span> 件 / 本</label>
+          <input type="range" id="note-calc-m-single-count" min="0" max="200" step="5" value="20">
+        </div>
+
+        <div class="note-calc-group">
+          <label for="note-calc-m-posts">月間の記事更新（投稿）本数: <span id="note-val-m-posts">25</span> 本</label>
+          <input type="range" id="note-calc-m-posts" min="1" max="31" step="1" value="25">
+        </div>
+      </div>
+
+      <div class="note-calc-results">
+        <div class="note-calc-card">
+          <div class="note-card-label">マガジン月間総売上</div>
+          <div class="note-card-value" id="note-result-m-gross">¥0</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">マガジン手取り（約76%）</div>
+          <div class="note-card-value" id="note-result-m-net">¥0</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">単品販売 月間総売上</div>
+          <div class="note-card-value" id="note-result-s-gross">¥0</div>
+        </div>
+        <div class="note-calc-card">
+          <div class="note-card-label">単品販売手取り（約85.5%）</div>
+          <div class="note-card-value" id="note-result-s-net">¥0</div>
+        </div>
+        <div class="note-card-shadow-box total-card">
+          <div class="note-card-label">💰 予想される合計月収益（振込手取り額面）</div>
+          <div class="note-card-value" id="note-result-m-total">¥0</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note-calc-intro-bottom">
+    <h3>📈 初期設定および計算ルールの根拠について</h3>
+    <p>
+      noteで発信される有料記事や定期購読マガジン。1本あたりの正確な売上や手取り額はクリエイター本人のみが知る情報であり一般には非公開（不明）ですが、記事下に表示される「高評価数（購入者・購読者限定のアクション）」やnote公式の手数料構造から、その収益規模をロジカルに予測・シミュレーションすることができます。
+    </p>
+    <p>
+      当ツールでは、熱心なファン層を抱える人気クリエイターの一般的な有料記事のアクティブ動向や公式の販売ルールをベースに、以下の客観的なデータを初期基準値として設定しています。
+    </p>
+    <ul>
+      <li>
+        <strong>【UI ①：note有料記事 1本の収益逆算】の根拠：</strong><br>
+        ・<strong>記事への高評価数（450人）：</strong>有料記事の最下部にある星マークの「高評価」は、実際にその記事を「単品購入した人」または「定期購読マガジンで閲覧している人」しか絶対に押すことができません。<br>
+        ・<strong>高評価率（70%）：</strong>有料エリアまで熱心に読み進めるコアなファン層のアクティブ率として、およそ「3人に2人以上（70%）」が読後に高評価ボタンを押すと手堅く仮定しています。<br>
+        ・<strong>単品購入の割合（20%）：</strong>継続購読マガジンをメインに据えつつ、SNS等から流入した新規読者が「300円の単品」としてスポット購入する、一般的な併行販売の比率をベースにしています。
+      </li>
+      <li>
+        <strong>【UI ②：月間の総収益（利益）予測】の根拠：</strong><br>
+        ・<strong>マガジン総購読者数（1,000人）：</strong>限定記事1本あたり安定して400件〜500件以上の「高評価」がついており、有料読者の一般的なアクティブ率（40%〜50%前後）を考慮すると、毎月継続して決済を行っている購読者総数として、最低でも1,000人規模が維持されている計算モデルを現実的な基準値として設定しています。<br>
+        ・<strong>月間の単品販売総数（20件 × 25本 ＝ 500件）：</strong>「月25本以上の高頻度更新（実質ほぼ毎日更新）」という執筆動向から算出。マガジンに未加入の読者が、気になる記事をスポット購入するケースを想定し、1記事あたり平均20件程度の単品購入が積み重なる計算です。
+      </li>
+      <li>
+        <strong>公式の手数料控除・振込ルール：</strong><br>
+        定期購読マガジン（プラットフォーム利用料20%）と、単品販売（利用料10%）の規約上の違いを完全に分離しています。まず売上から決済手数料（クレジットカード一律5%と仮定）を差し引き、その残額に対してそれぞれの利用料率を適用するnote公式の計算順序を忠実に再現。さらに月間総収益の計算では、一回の振込申請にかかる事務手数料270円を最終的に控除して手取りを算出します。
+      </li>
+    </ul>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 15px;">
+      【検証・シミュレーターの使い方】<br>
+      気になる記事の「高評価数」を入力し、「どれくらい単品で買われているか？」の割合を動かしたり、月間の投稿数を調整することで、該当するクリエイターがどれほどのスポット利益や月間収益を生み出しているかをリアルタイムに逆算・リサーチすることができます。
+    </p>
+  </div>
+
+</div>
+
+<style>
+  /* 全体レイアウトベース */
+  .note-main-wrapper {
+    max-width: 600px;
+    width: 92%;
+    margin: 30px auto;
+    font-family: sans-serif;
+    color: #333;
+    box-sizing: border-box;
+  }
+  .note-main-wrapper *, .note-main-wrapper *::before, .note-main-wrapper *::after {
+    box-sizing: inherit;
+  }
+
+  .note-calc-intro-top {
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  /* 🔄 切り替えタブのCSS */
+  .note-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 2;
+  }
+  .note-tab-btn {
+    flex: 1;
+    padding: 12px 5px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    background: #eef2f6;
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .note-tab-btn:hover {
+    background: #e4eaf0;
+  }
+  .note-tab-btn.active {
+    background: #fdfdfd;
+    color: #1a1a1a;
+    border-bottom: 1px solid #fdfdfd;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+  }
+
+  /* シミュレーター本体枠 */
+  .note-calc-container {
+    width: 100%;
+    padding: 25px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+  }
+
+  /* パネル設定 */
+  .note-pane {
+    display: none;
+  }
+  .note-pane.active {
+    display: block;
+  }
+
+  /* 各種フォーム */
+  .note-calc-title {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    text-align: center;
+  }
+  .note-calc-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  .note-calc-form {
+    margin-bottom: 25px;
+  }
+  .note-calc-group {
+    margin-bottom: 20px;
+  }
+  .note-calc-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  .note-calc-group label span {
+    color: #0066cc;
+    font-size: 1.1rem;
+  }
+  .note-calc-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    outline: none;
+  }
+  .note-calc-group-info {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 15px;
+  }
+  .note-calc-group-info strong {
+    color: #cc0000;
+  }
+  .note-calc-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .note-calc-card, .note-card-shadow-box {
+    background: #f5f7fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e6ebf4;
+  }
+  .total-card {
+    grid-column: span 2;
+    background: #eef9f0;
+    border: 1px solid #cceed4;
+  }
+  .note-card-label {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .note-card-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #111;
+  }
+  .total-card .note-card-value {
+    font-size: 1.6rem;
+    color: #27ae60;
+  }
+
+  .note-calc-intro-bottom {
+    line-height: 1.7;
+    margin-top: 25px;
+  }
+  .note-calc-intro-bottom h3 {
+    font-size: 1.1rem;
+    border-left: 4px solid #0066cc;
+    padding-left: 10px;
+    margin: 0 0 15px 0;
+    color: #1a1a1a;
+  }
+  .note-calc-intro-bottom p, .note-calc-intro-bottom ul {
+    font-size: 0.9rem;
+  }
+  .note-calc-intro-bottom ul {
+    padding-left: 20px;
+  }
+  .note-calc-intro-bottom li {
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .note-tab-btn {
+      font-size: 0.85rem;
+      padding: 10px 2px;
+    }
+    .note-calc-container {
+      padding: 15px;
+    }
+    .note-calc-title {
+      font-size: 1.1rem;
+    }
+    .note-calc-results { 
+      grid-template-columns: 1fr;
+    }
+    .total-card { 
+      grid-column: span 1; 
+    }
+  }
+</style>
+
+<script>
+  // 🔄 タブの切り替え処理
+  function switchNoteTab(tabName) {
+    document.getElementById('tab-btn-single').classList.remove('active');
+    document.getElementById('tab-btn-monthly').classList.remove('active');
+    document.getElementById('note-pane-single').classList.remove('active');
+    document.getElementById('note-pane-monthly').classList.remove('active');
+
+    if (tabName === 'single') {
+      document.getElementById('tab-btn-single').classList.add('active');
+      document.getElementById('note-pane-single').classList.add('active');
+    } else if (tabName === 'monthly') {
+      document.getElementById('tab-btn-monthly').classList.add('active');
+      document.getElementById('note-pane-monthly').classList.add('active');
+    }
+  }
+
+  // 📊 計算処理
+  (function() {
+    // UI ① 要素
+    const lInput = document.getElementById('note-calc-likes');
+    const aInput = document.getElementById('note-calc-action-rate');
+    const rInput = document.getElementById('note-calc-single-ratio');
+    const lVal = document.getElementById('note-val-likes');
+    const aVal = document.getElementById('note-val-action-rate');
+    const rVal = document.getElementById('note-val-single-ratio');
+    const mVal = document.getElementById('note-val-mag-ratio');
+    const resReaders = document.getElementById('note-result-readers');
+    const resCount = document.getElementById('note-result-single-count');
+    const resGross = document.getElementById('note-result-single-gross');
+    const resFee = document.getElementById('note-result-single-fee');
+    const resTotal = document.getElementById('note-result-total');
+
+    // UI ② 要素
+    const mmInput = document.getElementById('note-calc-mag-members');
+    const mspInput = document.getElementById('note-calc-m-single-price');
+    const mscInput = document.getElementById('note-calc-m-single-count');
+    const mpInput = document.getElementById('note-calc-m-posts');
+    
+    const mmVal = document.getElementById('note-val-mag-members');
+    const mspVal = document.getElementById('note-val-m-single-price');
+    const mscVal = document.getElementById('note-val-m-single-count');
+    const mpVal = document.getElementById('note-val-m-posts');
+
+    const resMGross = document.getElementById('note-result-m-gross');
+    const resMNet = document.getElementById('note-result-m-net');
+    const resSGross = document.getElementById('note-result-s-gross');
+    const resSNet = document.getElementById('note-result-s-net');
+    const resMTotal = document.getElementById('note-result-m-total');
+
+    // 固定価格（マガジンは770円ベース）
+    const PRICE_SINGLE_TAB1 = 300;
+    const PRICE_MAGAZINE = 770;
+
+    // UI ①：高評価から1本の売上を逆算
+    function calcSingleArticle() {
+      const likes = parseInt(lInput.value);
+      const actionRate = parseInt(aInput.value) / 100;
+      const singleRatio = parseInt(rInput.value) / 100;
+      const magRatioPercent = 100 - parseInt(rInput.value);
+
+      lVal.textContent = likes.toLocaleString();
+      aVal.textContent = (actionRate * 100).toFixed(0);
+      rVal.textContent = (singleRatio * 100).toFixed(0);
+      mVal.textContent = magRatioPercent;
+
+      const estimatedReaders = Math.round(likes / actionRate);
+      const singlePurchasers = Math.round(estimatedReaders * singleRatio);
+      const singleGross = singlePurchasers * PRICE_SINGLE_TAB1;
+      
+      const cardFee = Math.floor(singleGross * 0.05);
+      const platformFee = Math.floor((singleGross - cardFee) * 0.10);
+      const totalFee = cardFee + platformFee;
+      const netTotal = singleGross - totalFee;
+
+      resReaders.textContent = estimatedReaders.toLocaleString() + ' 人';
+      resCount.textContent = singlePurchasers.toLocaleString() + ' 人';
+      resGross.textContent = '¥' + singleGross.toLocaleString();
+      resFee.textContent = '-¥' + totalFee.toLocaleString();
+      resTotal.textContent = '¥' + netTotal.toLocaleString();
+    }
+
+    // UI ②：月全体の総利益を予測
+    function calcMonthlyRevenue() {
+      const members = parseInt(mmInput.value);
+      const singlePrice = parseInt(mspInput.value);
+      const singleCountPerPost = parseInt(mscInput.value);
+      const postsCount = parseInt(mpInput.value);
+
+      mmVal.textContent = members.toLocaleString();
+      mspVal.textContent = singlePrice.toLocaleString();
+      mscVal.textContent = singleCountPerPost.toLocaleString();
+      mpVal.textContent = postsCount.toLocaleString();
+
+      // マガジン計算
+      const mGross = members * PRICE_MAGAZINE;
+      const mCardFee = Math.floor(mGross * 0.05);
+      const mPlatformFee = Math.floor((mGross - mCardFee) * 0.20);
+      const mNet = mGross - (mCardFee + mPlatformFee);
+
+      // 単品計算（販売総数 ＝ 1本の販売数 × 月の投稿数）
+      const totalSingleSalesCount = singleCountPerPost * postsCount;
+      const sGross = totalSingleSalesCount * singlePrice;
+      const sCardFee = Math.floor(sGross * 0.05);
+      const sPlatformFee = Math.floor((sGross - sCardFee) * 0.10);
+      const sNet = sGross - (sCardFee + sPlatformFee);
+
+      // 最終合算（振込手数料270円）
+      let monthlyTotal = mNet + sNet;
+      if (monthlyTotal > 0) {
+        monthlyTotal = monthlyTotal - 270;
+      }
+
+      resMGross.textContent = '¥' + mGross.toLocaleString();
+      resMNet.textContent = '¥' + mNet.toLocaleString();
+      resSGross.textContent = '¥' + sGross.toLocaleString();
+      resSNet.textContent = '¥' + sNet.toLocaleString();
+      resMTotal.textContent = '¥' + (monthlyTotal < 0 ? 0 : monthlyTotal).toLocaleString();
+    }
+
+    // イベント紐付け
+    lInput.addEventListener('input', calcSingleArticle);
+    aInput.addEventListener('input', calcSingleArticle);
+    rInput.addEventListener('input', calcSingleArticle);
+
+    mmInput.addEventListener('input', calcMonthlyRevenue);
+    mspInput.addEventListener('input', calcMonthlyRevenue);
+    mscInput.addEventListener('input', calcMonthlyRevenue);
+    mpInput.addEventListener('input', calcMonthlyRevenue);
+
+    // 初期実行
+    calcSingleArticle();
+    calcMonthlyRevenue();
+  })();
+</script>
