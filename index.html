@@ -1,229 +1,231 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>akiha</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>akiha</title>
 
-<style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background: #f8f9fa; 
-  color: #1a1a1a;
-}
+  <style>
+    body{
+      margin:0;
+      font-family:sans-serif;
+      background: #f8f9fa; 
+      color: #1a1a1a;
+    }
 
-/* 画面全体のレイアウト：PCでは左右2分割（左：プロフィール、右：コンテンツ） */
-.main-layout {
-  display: flex;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  gap: 40px;
-}
+    /* 画面全体のレイアウト：PCでは左右2分割（左：プロフィール、右：コンテンツ） */
+    .main-layout {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      gap: 40px;
+    }
 
-/* 左側：note風プロフィールサイドバー */
-header {
-  width: 240px; /* 横幅を固定 */
-  flex-shrink: 0;
-  background: transparent;
-  text-align: left;
-}
+    /* 左側：note風プロフィールサイドバー */
+    header {
+      width: 240px; /* 横幅を固定 */
+      flex-shrink: 0;
+      background: transparent;
+      text-align: left;
+    }
 
-/* プロフィール内を縦並びに */
-.profile-wrapper {
-  position: sticky;
-  top: 40px; /* スクロールしても左側がついてくるように固定 */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+    /* プロフィール内を縦並びに */
+    .profile-wrapper {
+      position: sticky;
+      top: 40px; /* スクロールしても左側がついてくるように固定 */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
 
-.logo{
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 50%; /* note風の完全な丸型アイコンに */
-  border: 1px solid #e9ecef;
-  margin-bottom: 15px;
-}
+    .logo{
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 50%; /* note風の完全な丸型アイコンに */
+      border: 1px solid #e9ecef;
+      margin-bottom: 15px;
+    }
 
-h1{
-  font-size: 22px;
-  margin: 0;
-  color: #1a1a1a;
-  font-weight: bold;
-}
+    h1{
+      font-size: 22px;
+      margin: 0;
+      color: #1a1a1a;
+      font-weight: bold;
+    }
 
-p{
-  color: #6c757d;
-  font-size: 13px;
-  margin: 8px 0 0 0;
-  line-height: 1.4;
-}
+    p{
+      color: #6c757d;
+      font-size: 13px;
+      margin: 8px 0 0 0;
+      line-height: 1.4;
+    }
 
-/* SNS：縦またはコンパクトに並べる */
-.sns{
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column; /* 縦並びにしてnoteのメニュー風に */
-  gap: 8px;
-  width: 100%;
-}
+    /* SNS：縦またはコンパクトに並べる */
+    .sns{
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column; /* 縦並びにしてnoteのメニュー風に */
+      gap: 8px;
+      width: 100%;
+    }
 
-.sns a{
-  display: block;
-  padding: 8px 16px;
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  color: #495057;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: center;
-  transition: all 0.2s;
-}
+    .sns a{
+      display: block;
+      padding: 8px 16px;
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #495057;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s;
+    }
 
-.sns a:hover {
-  background: #23c16e; /* noteグリーン */
-  color: white;
-  border-color: #23c16e;
-}
+    .sns a:hover {
+      background: #23c16e; /* noteグリーン */
+      color: white;
+      border-color: #23c16e;
+    }
 
-/* 右側：メインコンテンツエリア */
-.container{
-  flex-grow: 1;
-  padding: 0;
-}
+    /* 右側：メインコンテンツエリア */
+    .container{
+      flex-grow: 1;
+      padding: 0;
+    }
 
-/* カテゴリセクション */
-.section-title {
-  font-size: 16px;
-  color: #6c757d; /* note風に少し薄めのスタイリッシュな色に */
-  margin: 0 0 15px 0;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-}
+    /* カテゴリセクション */
+    .section-title {
+      font-size: 16px;
+      color: #6c757d; /* note風に少し薄めのスタイリッシュな色に */
+      margin: 0 0 15px 0;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
 
-/* 最初のセクション以外の上マージン */
-.section-title.next {
-  margin-top: 40px;
-}
+    /* 最初のセクション以外の上マージン */
+    .section-title.next {
+      margin-top: 40px;
+    }
 
-/* 最大5列に並ぶグリッドレイアウト */
-.grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
+    /* 最大5列に並ぶグリッドレイアウト */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
 
-/* カードデザイン */
-.card{
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  padding: 20px 16px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #1a1a1a;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
+    /* カードデザイン */
+    .card{
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      padding: 20px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
 
-.card:hover {
-  transform: translateY(-4px);
-  border-color: #23c16e;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
-}
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #23c16e;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+    }
 
-.card .title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
+    .card .title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
 
-.card .desc {
-  font-size: 12px;
-  color: #6c757d;
-  line-height: 1.4;
-}
+    .card .desc {
+      font-size: 12px;
+      color: #6c757d;
+      line-height: 1.4;
+    }
 
-/* YouTubeエリア */
-.youtube{
-  margin-top: 40px;
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  padding: 20px;
-  border-radius: 8px;
-}
+    /* YouTubeエリア */
+    .youtube{
+      margin-top: 40px;
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      padding: 20px;
+      border-radius: 8px;
+    }
 
-.youtube h2{
-  font-size: 14px;
-  color: #6c757d;
-  margin-top: 0;
-  margin-bottom: 15px;
-}
+    .youtube h2{
+      font-size: 14px;
+      color: #6c757d;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
 
-.video-wrap{
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  aspect-ratio: 16/9;
-  border-radius: 8px;
-  overflow: hidden;
-}
+    .video-wrap{
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16/9;
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-iframe{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
+    iframe{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
 
-/* フッター */
-footer{
-  text-align: center;
-  padding: 60px 10px 20px;
-  color: #adb5bd;
-  font-size: 12px;
-  width: 100%;
-}
+    /* フッター */
+    footer{
+      text-align: center;
+      padding: 60px 10px 20px;
+      color: #adb5bd;
+      font-size: 12px;
+      width: 100%;
+    }
 
-/* スマホ表示（画面幅が狭いとき）は縦並びに戻す */
-@media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-    padding: 20px;
-    gap: 20px;
-  }
-  header {
-    width: 100%;
-    text-align: center;
-  }
-  .profile-wrapper {
-    position: static;
-    align-items: center;
-  }
-  .sns {
-    flex-direction: row;
-    justify-content: center;
-  }
-  .sns a {
-    flex: 1;
-    max-width: 100px;
-  }
-  .section-title.next {
-    margin-top: 30px;
-  }
-}
-</style>
-
+    /* スマホ表示（画面幅が狭いとき）は縦並びに戻す */
+    @media (max-width: 768px) {
+      .main-layout {
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+      }
+      header {
+        width: 100%;
+        text-align: center;
+      }
+      .profile-wrapper {
+        position: static;
+        align-items: center;
+      }
+      .sns {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .sns a {
+        flex: 1;
+        min-width: 80px;
+        max-width: 120px;
+        padding: 8px 10px;
+      }
+      .section-title.next {
+        margin-top: 30px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -257,6 +259,12 @@ footer{
       <a class="card" href="/game/invader2.html">
         <div class="title">🛵 SPACE HONGDARS 🏍️Version 2</div>
         <div class="desc">巨大アリ ホングダー から地球を守れ！</div>
+      </a>
+
+      <!-- 🛠️ 説明文（desc）をご指定の文章に修正 -->
+      <a class="card" href="/game/invader2_17.html">
+        <div class="title">🚀 SPACE HONGDARS V2.17 🐥</div>
+        <div class="desc">ひよ子の地球防衛隊員が、画面を埋め尽くす巨大アリ「ホングダー」の軍勢に立ち向かう！</div>
       </a>
     </div>
 
@@ -298,7 +306,10 @@ footer{
       © akiha
     </footer>
 
-  </div> </div> <script>
+  </div> 
+</div> 
+
+<script>
 const videos = [
   "V6vJ9jDvYgQ","DWPVW_WUwoE","wavyyVpParE","CbhoPZ_DWsg","uPB_sHxVZLw",
   "5jeHPjmL_Kw","Stmkos91qdQ","aHjGRFzvdjE","XcZierhguIw","x38r3KHGBWI",
