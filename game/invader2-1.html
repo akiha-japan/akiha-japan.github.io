@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS Version 2.14 🐥</title>
+  <title>🚀 SPACE HONGDARS Version 2.17 🐥</title>
 
-  <meta property="og:url" content="https://akiha-japan.github.io/game/invader2_14.html">
+  <meta property="og:url" content="https://akiha-japan.github.io/game/invader2_17.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🚀 SPACE HONGDARS Version 2.14 🐥">
+  <meta property="og:title" content="🚀 SPACE HONGDARS Version 2.17 🐥">
   <meta property="og:description" content="ひよこの地球防衛隊員🐥が、巨大アリ ホングダーから地球を守る！スマホで遊べる本格インベーダー風シューティングゲーム。">
   <meta property="og:image" content="https://akiha-japan.github.io/logo_v2_1.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -43,7 +43,6 @@
       background: linear-gradient(to right, #00ffff, #ff00ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 15px rgba(0,255,255,0.3);
     }
 
     .game-container {
@@ -54,7 +53,6 @@
       min-height: 440px;
       max-height: 600px;
       background: #000;
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
       border: 2px solid #333;
       touch-action: pan-y; 
     }
@@ -97,7 +95,6 @@
       border: 2px solid #00ffff;
       z-index: 20;
       box-sizing: border-box;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
     }
     .state-overlay h2 { margin: 0 0 10px 0; font-size: 1.8rem; line-height: 1.4; }
     .state-overlay p { margin: 5px 0 15px 0; font-size: 1.0rem; color: #ffcc00; line-height: 1.5; }
@@ -111,7 +108,6 @@
       border-radius: 4px;
       cursor: pointer;
       margin-top: 5px;
-      box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
     }
 
     .info-area {
@@ -137,7 +133,7 @@
 
   <div class="page-wrapper">
     
-    <div class="game-title">🚀 SPACE HONGDARS V2.14 🐥</div>
+    <div class="game-title">🚀 SPACE HONGDARS V2.17 🐥</div>
     
     <div class="game-container">
       <div class="hud">
@@ -190,7 +186,7 @@
     let invulnerableTimer = 0; 
     let autoFireTimer = 0; 
 
-    const player = { x: 220, y: 500, width: 36, height: 36, speed: 7, mode: 'single' };
+    const player = { x: 220, y: 500, width: 36, height: 36, speed: 7.5, mode: 'single' };
     let deadLineY = 450; 
 
     let bullets = [];
@@ -203,7 +199,7 @@
     let boss = null; 
 
     let invaderDirection = 1;
-    let baseSpeed = 0.55; 
+    let baseSpeed = 0.65; // 1倍速ループ用に速度を適正化
     let isPointerDown = false;
     let totalInvadersInLevel = 0; 
 
@@ -264,6 +260,7 @@
       powerup = null;
       boss = null;
       invaderDirection = 1;
+      invulnerableTimer = 0; 
 
       updateStageDisplay();
 
@@ -275,7 +272,7 @@
           height: 40,
           hp: 40, 
           maxHp: 40,
-          vx: 2.2, 
+          vx: 2.5, 
           hitFlash: 0,
           shootTimer: 0
         };
@@ -315,9 +312,10 @@
       totalInvadersInLevel = invaders.length; 
     }
 
+    // 星くずの初期配置（スピード感を調整）
     stars = [];
     for(let i=0; i<60; i++) {
-      stars.push({ x: Math.random() * 480, y: Math.random() * 600, speed: Math.random() * 2.0 + 0.3 });
+      stars.push({ x: Math.random() * 480, y: Math.random() * 600, speed: Math.random() * 2.5 + 0.6 });
     }
 
     function handlePointer(clientX) {
@@ -379,7 +377,8 @@
     function checkAutoFire() {
       if (!isPointerDown || gameOver || gameClear) return;
       autoFireTimer++;
-      if (autoFireTimer >= 8) { 
+      // 🛠️ 1倍速ループ化に伴い、連射が遅く感じられないよう間隔を6フレームに短縮
+      if (autoFireTimer >= 6) { 
         autoFireTimer = 0;
         fireBullet();
       }
@@ -387,11 +386,11 @@
 
     function fireBullet() {
       if (player.mode === 'wide') {
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9, vx: -1.5, color: "#ff00ff" });
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9, vx: 0, color: "#ff00ff" });
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9, vx: 1.5, color: "#ff00ff" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: -1.6, color: "#ff00ff" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 0, color: "#ff00ff" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 1.6, color: "#ff00ff" });
       } else {
-        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9, vx: 0, color: "#ffff00" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 0, color: "#ffff00" });
       }
       playSound(360, 'square', 0.04);
     }
@@ -435,6 +434,7 @@
       particles = [];
       player.mode = 'single';
       isPointerDown = false;
+      invulnerableTimer = 0; 
       scoreEl.textContent = score;
       lifeEl.textContent = "❤️❤️❤️";
       statusPanel.classList.add("hidden");
@@ -448,6 +448,10 @@
     });
 
     function gameLoop() {
+      // 🛠️ 過去の残像データをバッファから物理的に完全消去（半透明化・ブレの絶対防御）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 改めて黒背景で塗りつぶし
       ctx.fillStyle = "#000000"; 
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
@@ -467,7 +471,7 @@
       if (invulnerableTimer > 0) invulnerableTimer--;
 
       if(!ufo && Math.random() < 0.0035) {
-        ufo = { x: -40, y: 38, width: 30, height: 20, speed: canvas.width * 0.006 };
+        ufo = { x: -40, y: 38, width: 30, height: 20, speed: canvas.width * 0.007 };
       }
       if(ufo) {
         ufo.x += ufo.speed;
@@ -499,9 +503,9 @@
           let bx = boss.x + boss.width / 2;
           let by = boss.y + boss.height;
           
-          enemyBullets.push({ x: bx, y: by, speed: 3.5, vx: -1.4, r: 6 });
-          enemyBullets.push({ x: bx, y: by, speed: 3.8, vx: 0, r: 6 });
-          enemyBullets.push({ x: bx, y: by, speed: 3.5, vx: 1.4, r: 6 });
+          enemyBullets.push({ x: bx, y: by, speed: 3.8, vx: -1.5, r: 6 });
+          enemyBullets.push({ x: bx, y: by, speed: 4.2, vx: 0, r: 6 });
+          enemyBullets.push({ x: bx, y: by, speed: 3.8, vx: 1.5, r: 6 });
           playSound(200, 'triangle', 0.1);
         }
       } 
@@ -519,7 +523,7 @@
         }
 
         let shiftDown = false;
-        let currentSpeed = (baseSpeed + (stage - 1) * 0.13) * invaderDirection * speedMultiplier;
+        let currentSpeed = (baseSpeed + (stage - 1) * 0.15) * invaderDirection * speedMultiplier;
 
         for (let i = 0; i < invaders.length; i++) {
           let inv = invaders[i];
@@ -535,17 +539,17 @@
 
         if (shiftDown) {
           invaderDirection *= -1;
-          invaders.forEach(inv => { if (inv.alive) inv.y += 11; }); 
+          invaders.forEach(inv => { if (inv.alive) inv.y += 12; }); 
         }
 
-        let shootProbability = 0.0006; 
+        let shootProbability = 0.0007; 
         if (stage === 2) {
-          shootProbability = 0.00085; 
+          shootProbability = 0.001; 
         }
 
         invaders.forEach(inv => {
           if (inv.alive && Math.random() < shootProbability * stage) {
-            enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 2.9 + stage*0.2, vx: 0, r: 4.5 });
+            enemyBullets.push({ x: inv.x + inv.width/2, y: inv.y + inv.height, speed: 3.2 + stage*0.2, vx: 0, r: 4.5 });
           }
         });
       }
@@ -556,7 +560,7 @@
         let dx = (player.x + player.width / 2) - ufoCenterX;
         let dy = player.y - ufoCenterY;
         let distance = Math.sqrt(dx * dx + dy * dy);
-        let bulletSpeed = 4.0;
+        let bulletSpeed = 4.2;
         enemyBullets.push({ x: ufoCenterX, y: ufoCenterY, speed: (dy / distance) * bulletSpeed, vx: (dx / distance) * bulletSpeed, r: 4.5 });
       }
 
@@ -576,7 +580,7 @@
       }
 
       if(powerup) {
-        powerup.y += 1.8;
+        powerup.y += 2.0;
         if(powerup.y > canvas.height) {
           powerup = null;
         } else if(powerup.x > player.x && powerup.x < player.x + player.width && 
@@ -687,20 +691,20 @@
     }
 
     function draw() {
-      // 1. まず星くずを透明度（Alpha）を変えながら描画
+      // 1. 星くずの描画
       stars.forEach(st => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${st.speed / 2})`; 
+        ctx.fillStyle = `rgba(255, 255, 255, ${st.speed / 2.5})`; 
         ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8);
       });
 
-      // 2. 防衛ラインを半透明で描画
+      // 2. 防衛ラインの描画
       if (stage < 3) {
         ctx.strokeStyle = "rgba(0, 255, 255, 0.4)"; 
         ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]); ctx.beginPath();
         ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
       }
 
-      // 🛠️ 【超重要】以降のキャラクター描写に半透明を引きずらせないよう、不透明度を100%に完全リセット！
+      // 🛠️ アルファチャンネル（透明度）を1.0に絶対固定
       ctx.globalAlpha = 1.0;
 
       // 3. 自機（ひよこ）の描画
@@ -709,13 +713,11 @@
         ctx.fillText("🐥", player.x + player.width/2, player.y + player.height/2 + 2);
       }
 
-      // 4. その他の要素も100%の濃さで描画
+      // 4. 各種オブジェクト描画
       bullets.forEach(b => {
         ctx.fillStyle = b.color;
         ctx.fillRect(b.x, b.y, b.width, b.height);
-        ctx.shadowColor = b.color; ctx.shadowBlur = 4; 
       });
-      ctx.shadowBlur = 0; 
 
       enemyBullets.forEach(eb => {
         ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
@@ -777,9 +779,13 @@
 
     window.addEventListener("resize", syncLayout);
     
-    syncLayout();
-    initLevel();
-    gameLoop();
+    // 🛠️ 【二重起動を完全に遮断】
+    // スクリプト読み込み時の直叩きgameLoop()を完全に排除し、window.onloadでのみ1回起動するように一本化
+    window.onload = function() {
+      syncLayout();
+      initLevel();
+      gameLoop(); 
+    };
   </script>
 </body>
 </html>
