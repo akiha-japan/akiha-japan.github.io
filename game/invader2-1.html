@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS Version 2.17 🐥</title>
+  <title>🚀 SPACE HONGDARS Version 2.19 🐥</title>
 
   <meta property="og:url" content="https://akiha-japan.github.io/game/invader2_17.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🚀 SPACE HONGDARS Version 2.17 🐥">
+  <meta property="og:title" content="🚀 SPACE HONGDARS Version 2.19 🐥">
   <meta property="og:description" content="ひよこの地球防衛隊員🐥が、巨大アリ ホングダーから地球を守る！スマホで遊べる本格インベーダー風シューティングゲーム。">
   <meta property="og:image" content="https://akiha-japan.github.io/logo_v2_1.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -89,7 +89,7 @@
       transform: translate(-50%, -50%);
       text-align: center;
       width: 85%;
-      background: rgba(0, 0, 0, 0.95);
+      background: #000000;
       padding: 20px;
       border-radius: 8px;
       border: 2px solid #00ffff;
@@ -120,7 +120,7 @@
       font-size: 0.85rem;
       line-height: 1.6;
       color: #ccc;
-      background: rgba(34, 34, 34, 0.8);
+      background: #222222;
       padding: 12px;
       border-radius: 6px;
       border: 1px solid #444;
@@ -133,7 +133,7 @@
 
   <div class="page-wrapper">
     
-    <div class="game-title">🚀 SPACE HONGDARS V2.17 🐥</div>
+    <div class="game-title">🚀 SPACE HONGDARS V2.19 🐥</div>
     
     <div class="game-container">
       <div class="hud">
@@ -163,7 +163,10 @@
 
   <script>
     const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    
+    // 【最重要】Canvasから透明度（アルファチャンネル）を完全に剥奪し、ブラウザの描画バグを根本封じ
+    const ctx = canvas.getContext("2d", { alpha: false });
+    
     const scoreEl = document.getElementById("score");
     const stageEl = document.getElementById("stage");
     const lifeEl = document.getElementById("life");
@@ -186,6 +189,7 @@
     let invulnerableTimer = 0; 
     let autoFireTimer = 0; 
 
+    let isLayoutInitialized = false;
     const player = { x: 220, y: 500, width: 36, height: 36, speed: 7.5, mode: 'single' };
     let deadLineY = 450; 
 
@@ -199,9 +203,13 @@
     let boss = null; 
 
     let invaderDirection = 1;
-    let baseSpeed = 0.65; // 1倍速ループ用に速度を適正化
+    let baseSpeed = 0.65; 
     let isPointerDown = false;
     let totalInvadersInLevel = 0; 
+
+    function updateLifeDisplay() {
+      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+    }
 
     function syncLayout() {
       const container = document.querySelector('.game-container');
@@ -211,14 +219,16 @@
       canvas.width = w;
       canvas.height = h;
 
+      if (!isLayoutInitialized || gameOver || gameClear) {
+        player.x = w / 2 - player.width / 2;
+        isLayoutInitialized = true;
+      }
+
       player.y = h - 60;
       deadLineY = h - 80;
 
       if (player.x < 0) player.x = 0;
       if (player.x > w - player.width) player.x = w - player.width;
-      if (player.x === 220) {
-        player.x = w / 2 - player.width / 2;
-      }
     }
 
     function initAudio() {
@@ -250,6 +260,7 @@
       } else {
         stageBoardEl.innerHTML = "STAGE: <span>" + stage + "</span>";
       }
+      stageEl.textContent = stage;
     }
 
     function initLevel() {
@@ -312,10 +323,18 @@
       totalInvadersInLevel = invaders.length; 
     }
 
-    // 星くずの初期配置（スピード感を調整）
     stars = [];
     for(let i=0; i<60; i++) {
-      stars.push({ x: Math.random() * 480, y: Math.random() * 600, speed: Math.random() * 2.5 + 0.6 });
+      // 星の明るさをRGBの輝度（0〜255）として保持（アルファブレンドを避けるため）
+      let brightness = Math.floor(Math.random() * 150) + 50; 
+      // 16進数のカラーコードを事前生成してバグを完全に排除
+      let hex = brightness.toString(16).padStart(2, '0');
+      stars.push({ 
+        x: Math.random() * 480, 
+        y: Math.random() * 600, 
+        speed: Math.random() * 2.5 + 0.6,
+        color: `#${hex}${hex}${hex}`
+      });
     }
 
     function handlePointer(clientX) {
@@ -377,7 +396,6 @@
     function checkAutoFire() {
       if (!isPointerDown || gameOver || gameClear) return;
       autoFireTimer++;
-      // 🛠️ 1倍速ループ化に伴い、連射が遅く感じられないよう間隔を6フレームに短縮
       if (autoFireTimer >= 6) { 
         autoFireTimer = 0;
         fireBullet();
@@ -410,7 +428,7 @@
       if (invulnerableTimer > 0) return; 
       lives--;
       player.mode = 'single'; 
-      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+      updateLifeDisplay();
 
       if (lives <= 0) {
         triggerGameOver("ひよこのライフが尽きてしまった...");
@@ -436,7 +454,7 @@
       isPointerDown = false;
       invulnerableTimer = 0; 
       scoreEl.textContent = score;
-      lifeEl.textContent = "❤️❤️❤️";
+      updateLifeDisplay();
       statusPanel.classList.add("hidden");
       syncLayout();
       initLevel();
@@ -448,10 +466,6 @@
     });
 
     function gameLoop() {
-      // 🛠️ 過去の残像データをバッファから物理的に完全消去（半透明化・ブレの絶対防御）
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // 改めて黒背景で塗りつぶし
       ctx.fillStyle = "#000000"; 
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
@@ -539,7 +553,7 @@
 
         if (shiftDown) {
           invaderDirection *= -1;
-          invaders.forEach(inv => { if (inv.alive) inv.y += 12; }); 
+           invaders.forEach(inv => { if (inv.alive) inv.y += 12; }); 
         }
 
         let shootProbability = 0.0007; 
@@ -677,43 +691,35 @@
         if (aliveCount === 0 && invaders.length > 0) {
           stage++; 
           player.mode = 'single'; 
-          let currentLives = 0;
-          for(let i=0; i<lifeEl.textContent.length; i++) {
-            if(lifeEl.textContent[i] === "❤️") currentLives++;
+          
+          if (lives < 3) {
+            lives++;
           }
-          if (currentLives < 3) {
-            currentLives++;
-            lifeEl.textContent = "❤️".repeat(currentLives) + "🖤".repeat(3 - currentLives);
-          }
+          updateLifeDisplay();
           initLevel(); 
         }
       }
     }
 
     function draw() {
-      // 1. 星くずの描画
+      // 背景の星くずを透明度(rgba)ではなく、純粋な色の濃淡(hex)で直に塗る
       stars.forEach(st => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${st.speed / 2.5})`; 
+        ctx.fillStyle = st.color; 
         ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8);
       });
 
-      // 2. 防衛ラインの描画
       if (stage < 3) {
-        ctx.strokeStyle = "rgba(0, 255, 255, 0.4)"; 
+        // デッドラインも透明度抜き（ソリッドな暗いシアン）に変更
+        ctx.strokeStyle = "#006666"; 
         ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]); ctx.beginPath();
         ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
       }
 
-      // 🛠️ アルファチャンネル（透明度）を1.0に絶対固定
-      ctx.globalAlpha = 1.0;
-
-      // 3. 自機（ひよこ）の描画
       if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 8) % 2 === 0) {
         ctx.font = "34px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText("🐥", player.x + player.width/2, player.y + player.height/2 + 2);
       }
 
-      // 4. 各種オブジェクト描画
       bullets.forEach(b => {
         ctx.fillStyle = b.color;
         ctx.fillRect(b.x, b.y, b.width, b.height);
@@ -722,7 +728,7 @@
       enemyBullets.forEach(eb => {
         ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
         ctx.fillStyle = "#ff0033"; ctx.fill();
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.stroke(); 
+        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1; ctx.stroke(); 
       });
 
       particles.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); });
@@ -748,14 +754,14 @@
         ctx.textBaseline = "middle";
         ctx.fillText("BOSS HP ", gx - 5, gy + gaugeH / 2);
 
-        ctx.fillStyle = "#222";
+        ctx.fillStyle = "#222222";
         ctx.fillRect(gx, gy, gaugeW, gaugeH);
         
         let currentW = (boss.hp / boss.maxHp) * gaugeW;
         ctx.fillStyle = "#ff00ff"; 
         ctx.fillRect(gx, gy, currentW, gaugeH);
         
-        ctx.strokeStyle = "#fff"; 
+        ctx.strokeStyle = "#ffffff"; 
         ctx.lineWidth = 1; 
         ctx.strokeRect(gx, gy, gaugeW, gaugeH);
       } 
@@ -779,11 +785,10 @@
 
     window.addEventListener("resize", syncLayout);
     
-    // 🛠️ 【二重起動を完全に遮断】
-    // スクリプト読み込み時の直叩きgameLoop()を完全に排除し、window.onloadでのみ1回起動するように一本化
     window.onload = function() {
       syncLayout();
       initLevel();
+      updateLifeDisplay(); 
       gameLoop(); 
     };
   </script>
