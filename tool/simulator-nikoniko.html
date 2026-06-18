@@ -1,24 +1,15 @@
-<!-- 
-  ==================================================================
-  【修正版】ニコ生会員【蓋】配信 収益シミュレーター v1.1
-  ==================================================================
--->
-
 <div class="yt-main-wrapper">
 
-  <!-- ① 導入テキスト -->
   <div class="yt-calc-intro-top">
     <p>
       多くの視聴者を集めるネット政治・ニュース論壇において、YouTubeの規制リスクを回避しつつ<strong>【蓋】</strong>をしてコアなファンと深く繋がる場となっている<strong>「ニコ生チャンネル（有料会員制）」（例として「百田尚樹チャンネル」など）</strong>。その正確な月間収益や手取り額は公式には<strong>非公開（不明）</strong>ですが、ドワンゴが規定する公式の分配規約（二重手数料の構造）や会員データから、そのリアルな収益構造をロジカルに予測・シミュレーションすることができます。
     </p>
   </div>
 
-  <!-- ② ニコ生シミュレーター本体 -->
   <div class="yt-calc-container">
     <h2 class="yt-calc-title">📊 ニコ生会員【蓋】配信 収益シミュレーター v1.1</h2>
     <p class="yt-calc-subtitle">月額サブスクのリアルな固定手取りを可視化します</p>
 
-    <!-- 入力フォームエリア -->
     <div class="yt-calc-form">
       <div class="yt-calc-group">
         <label for="calc-members">有料会員数: <span id="val-members">30,000</span> 人</label>
@@ -31,7 +22,6 @@
       </div>
     </div>
 
-    <!-- 計算結果表示エリア -->
     <div class="yt-calc-results">
       <div class="yt-calc-card">
         <div class="yt-card-label">月間 会員売上（額面）</div>
@@ -41,8 +31,6 @@
         <div class="yt-card-label">実質手数料（約29.8%）</div>
         <div class="yt-card-value fee-color" id="result-fee">¥0</div>
       </div>
-      
-      <!-- 固定収入カード -->
       <div class="yt-calc-card total-card">
         <div class="yt-card-label">🛡️ 配信者の月間固定手取り（毎月確定）</div>
         <div class="yt-card-value" id="result-monthly-net">¥0</div>
@@ -50,50 +38,51 @@
     </div>
   </div>
 
-  <!-- ③ 根拠・使い方テキスト -->
   <div class="yt-calc-intro-bottom">
-    <h3>📈 シミュレーションの根拠</h3>
+    <h3>📈 シミュレーションの根拠と仕様</h3>
+    <p>当ツールでは、有料会員数をベースに、ニコニコチャンネル公式の規約に則った二重手数料ロジックを正確に組み込んでいます。</p>
     <ul>
-      <li><strong>二重手数料の仕組み（実質約30%）：</strong>売上から「まず事務・決済手数料14%＋消費税（計15.4%）」を差し引き、残額の「83%」が配信者に支払われる契約構造を再現しています。</li>
-      <li><strong>サブスクの安定性：</strong>月額課金のため、配信回数に左右されず、会員数と単価で毎月の固定収益が確定する構造です。</li>
+      <li><strong>有料会員数と月額単価：</strong>時事・政治ジャンルにおける大規模チャンネルのデータを想定し、デフォルト値を設定しています。会員制のため、配信頻度に関わらず毎月安定した固定収入（サブスクリプション）のベースとなります。</li>
+      <li><strong>二重手数料の仕組み（実質約29.8%）：</strong>ニコニコチャンネルの分配は、全体の売上から「まず事務・決済手数料14%＋消費税（計15.4%）」を差し引き、その残額の「83%」が配信者に支払われる契約構造（ドワンゴの取り分）になっています。逆算すると、<strong>総売上の約29.8%が手数料として引かれる</strong>計算になり、当シミュレーターはこのリアルな手取り率（約70.2%）を完全に再現しています。</li>
     </ul>
+    <div class="yt-calc-usage-box">
+      <strong>【使い方】</strong><br>
+      スライダーを動かすことで、「もし会員数がさらに増えたら？」「価格を改定したら？」など、条件に応じたリアルタイムの収益予測値を自由に出すことができます。
+    </div>
   </div>
 </div>
 
 <style>
-  .yt-main-wrapper { max-width: 600px; width: 100%; margin: 30px auto; font-family: sans-serif; color: #333; }
-  .yt-calc-container { padding: 25px; background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  .yt-calc-title { margin-top: 0; text-align: center; }
-  .yt-calc-group { margin-bottom: 25px; }
-  .yt-calc-group input[type="range"] { width: 100%; height: 8px; cursor: pointer; }
-  .yt-calc-results { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-  .yt-calc-card { background: #f5f7fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e6ebf4; }
+  .yt-main-wrapper { width: 100%; max-width: 600px; margin: 20px auto; font-family: sans-serif; color: #333; box-sizing: border-box; padding: 0 10px; }
+  .yt-calc-container { padding: 20px; background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .yt-calc-title { font-size: 1.2rem; text-align: center; margin-bottom: 5px; }
+  .yt-calc-subtitle { font-size: 0.85rem; text-align: center; color: #666; margin-bottom: 20px; }
+  .yt-calc-group { margin-bottom: 20px; }
+  .yt-calc-group input[type="range"] { width: 100%; height: 10px; cursor: pointer; }
+  .yt-calc-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .yt-calc-card { background: #f5f7fa; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #e6ebf4; }
   .total-card { grid-column: span 2; background: #eef9f0; border: 1px solid #cceed4; }
-  .yt-card-value { font-size: 1.5rem; font-weight: bold; color: #111; }
-  .total-card .yt-card-value { font-size: 2rem; color: #27ae60; }
-  .fee-color { color: #c0392b !important; }
+  .yt-card-label { font-size: 0.75rem; color: #555; }
+  .yt-card-value { font-size: 1.2rem; font-weight: bold; }
+  .total-card .yt-card-value { font-size: 1.5rem; color: #27ae60; }
+  .fee-color { color: #c0392b; }
+  .yt-calc-intro-bottom h3 { font-size: 1rem; border-left: 4px solid #cc0033; padding-left: 10px; margin-top: 20px; }
+  .yt-calc-intro-bottom ul { padding-left: 20px; font-size: 0.9rem; }
+  .yt-calc-usage-box { background: #f9f9f9; padding: 15px; border-radius: 6px; font-size: 0.9rem; border: 1px solid #eee; margin-top: 15px; }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const mInput = document.getElementById('calc-members');
-    const pInput = document.getElementById('calc-price');
-    const mVal = document.getElementById('val-members');
-    const pVal = document.getElementById('val-price');
-    const resGross = document.getElementById('result-gross');
-    const resFee = document.getElementById('result-fee');
-    const resMonthlyNet = document.getElementById('result-monthly-net');
+    const mInput = document.getElementById('calc-members'), pInput = document.getElementById('calc-price');
+    const mVal = document.getElementById('val-members'), pVal = document.getElementById('val-price');
+    const resGross = document.getElementById('result-gross'), resFee = document.getElementById('result-fee'), resMonthlyNet = document.getElementById('result-monthly-net');
 
     function updateCalculations() {
-      const members = parseInt(mInput.value);
-      const price = parseInt(pInput.value);
-      mVal.textContent = members.toLocaleString();
-      pVal.textContent = price.toLocaleString();
-
+      const members = parseInt(mInput.value), price = parseInt(pInput.value);
+      mVal.textContent = members.toLocaleString(); pVal.textContent = price.toLocaleString();
       const gross = members * price;
       const firstStageFee = Math.round(gross * 0.154);
       const monthlyNet = Math.round((gross - firstStageFee) * 0.83);
-      
       resGross.textContent = '¥' + gross.toLocaleString();
       resFee.textContent = '¥' + (gross - monthlyNet).toLocaleString();
       resMonthlyNet.textContent = '¥' + monthlyNet.toLocaleString();
