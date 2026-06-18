@@ -53,7 +53,23 @@
 </div>
 
 <style>
-  .yt-main-wrapper { width: 100%; max-width: 600px; margin: 20px auto; font-family: sans-serif; color: #333; box-sizing: border-box; padding: 0 10px; }
+  /* スマホ等で画面端まで広げるベース設定 */
+  .yt-main-wrapper { 
+    width: 100%; 
+    margin: 20px auto; 
+    font-family: sans-serif; 
+    color: #333; 
+    box-sizing: border-box; 
+    padding: 0 10px;
+  }
+  
+  /* PCなど幅が広い場合のみ600pxで制限・中央寄せ */
+  @media (min-width: 600px) {
+    .yt-main-wrapper {
+      max-width: 600px;
+    }
+  }
+
   .yt-calc-container { padding: 20px; background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 8px; }
   .yt-calc-title { font-size: 1.2rem; text-align: center; margin-bottom: 5px; }
   .yt-calc-subtitle { font-size: 0.85rem; text-align: center; color: #666; margin-bottom: 20px; }
