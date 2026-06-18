@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ニコ生会員【蓋】配信 収益シミュレーター v1.1</title>
+  <title>ニコ生会員【蓋】配信 収益シミュレーター v1.2</title>
 </head>
 <body>
 
@@ -16,13 +16,13 @@
   </div>
 
   <div class="yt-calc-container">
-    <h2 class="yt-calc-title">📊 ニコ生会員【蓋】配信 収益シミュレーター v1.1</h2>
+    <h2 class="yt-calc-title">📊 ニコ生会員【蓋】配信 収益シミュレーター v1.2</h2>
     <p class="yt-calc-subtitle">月額サブスクのリアルな固定手取りを可視化します</p>
 
     <div class="yt-calc-form">
       <div class="yt-calc-group">
         <label for="calc-members">有料会員数: <span id="val-members">30,000</span> 人</label>
-        <input type="range" id="calc-members" min="5000" max="50000" step="1000" value="30000">
+        <input type="range" id="calc-members" min="0" max="100000" step="500" value="30000">
       </div>
 
       <div class="yt-calc-group">
@@ -51,12 +51,12 @@
     <h3>📈 シミュレーションの根拠と仕様</h3>
     <p>当ツールでは、有料会員数をベースに、ニコニコチャンネル公式の規約に則った二重手数料ロジックを正確に組み込んでいます。</p>
     <ul>
-      <li><strong>有料会員数と月額単価：</strong>時事・政治ジャンルにおける大規模チャンネルのデータを想定し、デフォルト値を設定しています。会員制のため、配信頻度に関わらず毎月安定した固定収入（サブスクリプション）のベースとなります。</li>
+      <li><strong>有料会員数と月額単価：</strong>0人から10万人までのスケールに対応。会員制のため、配信頻度に関わらず毎月安定した固定収入（サブスクリプション）のベースとなります。</li>
       <li><strong>二重手数料の仕組み（実質約29.8%）：</strong>ニコニコチャンネルの分配は、全体の売上から「まず事務・決済手数料14%＋消費税（計15.4%）」を差し引き、その残額の「83%」が配信者に支払われる契約構造（ドワンゴの取り分）になっています。逆算すると、<strong>総売上の約29.8%が手数料として引かれる</strong>計算になり、当シミュレーターはこのリアルな手取り率（約70.2%）を完全に再現しています。</li>
     </ul>
     <div class="yt-calc-usage-box">
       <strong>【使い方】</strong><br>
-      スライダーを動かすことで、「もし会員数がさらに増えたら？」「価格を改定したら？」など、条件に応じたリアルタイムの収益予測値を自由に出すことができます。
+      スライダーを動かすことで、「もし会員数が10万人に達したら？」「価格を改定したら？」など、条件に応じたリアルタイムの収益予測値を自由に出すことができます。
     </div>
   </div>
 </div>
