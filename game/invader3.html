@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🚀 SPACE HONGDARS V3.3 最後の死闘 🐥</title>
+  <title>🚀 SPACE HONGDARS V3.4 最後の死闘 🐥</title>
 
   <meta property="og:url" content="https://akiha-japan.github.io/game/invader_v3.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🚀 SPACE HONGDARS V3.3 最後の死闘 🐥">
+  <meta property="og:title" content="🚀 SPACE HONGDARS V3.4 最後の死闘 🐥">
   <meta property="og:description" content="全3ステージ、すべてが巨大ボス！新機能を引っ提げたボスバトル特化型シューティング。">
   <meta property="og:image" content="https://akiha-japan.github.io/logo_v2_1.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -133,7 +133,7 @@
 
   <div class="page-wrapper">
     
-    <div class="game-title">🚀 SPACE HONGDARS V3.3 最後の死闘 🐥</div>
+    <div class="game-title">🚀 SPACE HONGDARS V3.4 最後の死闘 🐥</div>
     
     <div class="game-container">
       <div class="hud">
@@ -494,42 +494,56 @@
             playSound(180, 'triangle', 0.08);
           }
         } 
+
+
+
+
+       // STAGE 2: 巨大スマホ (ビーム ＋ 改良版・連続時爆通知爆弾 ⚠️)
         else if (stage === 2) {
-          // STAGE 2: 巨大スマホ (ビーム ＋ 改良版・連続時爆通知爆弾 ⚠️)
           boss.specialTimer++;
           
+          // ボスが徐々に降りてくるロジック
           if (boss.specialTimer % 220 === 0) {
             boss.y += 8;
             if (boss.y >= deadLineY - 60) boss.y = deadLineY - 60;
           }
 
-          // 通常の縦ビーム攻撃（これは従来通り）
-          if (boss.shootTimer === 20 || boss.shootTimer === 50) {
+          // 【調整版】3連ビーム攻撃（間隔とスピードを緩和）
+          // shootTimerの50のタイミングで一度だけ3発撃つように変更
+          if (boss.shootTimer === 50) {
             let bx = boss.x + boss.width / 2;
             let by = boss.y + boss.height;
-            enemyBullets.push({ x: bx, y: by, speed: 7.2, vx: 0, r: 4, type: 'beam' });
+            // 3方向に拡散して発射 (スピードを 7.2 → 5.0 に低下)
+            [-1, 0, 1].forEach(offset => {
+              enemyBullets.push({ 
+                x: bx, 
+                y: by, 
+                speed: 5.0, 
+                vx: offset * 2.5, 
+                r: 4, 
+                type: 'beam' 
+              });
+            });
             playSound(280, 'sawtooth', 0.1);
           }
-          if (boss.shootTimer > 60) boss.shootTimer = 0;
+          // 攻撃間隔のサイクルを少し伸ばしてゆったりにする
+          if (boss.shootTimer > 80) boss.shootTimer = 0;
 
-          // 【新ロジック】⚠️時限爆弾の超連発管理
-          // 画面内に現在アクティブな⚠️が存在するかチェック
+          // 【調整版】時限爆弾(⚠️)の連発管理
           let hasActiveWarning = enemyBullets.some(eb => eb.type === 'warning');
           
           if (!hasActiveWarning) {
-            // 画面に⚠️がない場合、ランダムカウントダウンを進める
             nextWarningTimer--;
             if (nextWarningTimer <= 0) {
-              // カウントゼロで新しい⚠️を発射！
               let bx = boss.x + boss.width / 2;
               let by = boss.y + boss.height;
-              let targetY = deadLineY - 35 - (Math.random() * 90); // ひよこの少し上あたり
+              let targetY = deadLineY - 35 - (Math.random() * 90);
               
               enemyBullets.push({ 
                 x: bx, 
                 y: by, 
                 speed: 4.5, 
-                vx: (Math.random() - 0.5) * 4, // 左右に少し散らす
+                vx: (Math.random() - 0.5) * 4, 
                 r: 8, 
                 type: 'warning', 
                 targetY: targetY, 
@@ -538,11 +552,17 @@
               });
               playSound(210, 'square', 0.06);
 
-              // 次の⚠️が出るまでのランダム間隔をあらかじめセット（10〜60フレーム ＝ 約0.1〜1秒）
-              nextWarningTimer = Math.floor(Math.random() * 50) + 10;
+              // 警告弾の間隔を広げる (10〜60 → 50〜100 に変更)
+              nextWarningTimer = Math.floor(Math.random() * 50) + 50;
             }
           }
-        } 
+        }
+
+
+
+
+
+
         else if (stage === 3) {
           // STAGE 3: 巨大タコ -> イカ変身暴走
           if (boss.form === 'tako' && boss.hp <= boss.maxHp / 2) {
