@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🚀 SPACE HONGDARS V3.4 最後の死闘 🐥</title>
+
+  <meta property="og:url" content="https://akiha-japan.github.io/game/invader_v3.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="🚀 SPACE HONGDARS V3.4 最後の死闘 🐥">
+  <meta property="og:description" content="全3ステージ、すべてが巨大ボス！新機能を引っ提げたボスバトル特化型シューティング。">
+  <meta property="og:image" content="https://akiha-japan.github.io/logo_v2_1.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Courier New', sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding-bottom: 50px;
+    }
+
+    .game-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 15px 0 10px 0;
+      text-align: center;
+      letter-spacing: 2px;
+      background: linear-gradient(to right, #ff0055, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 65vh;
+      min-height: 440px;
+      max-height: 600px;
+      background: #000;
+      border: 2px solid #333;
+      touch-action: pan-y; 
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      touch-action: none; 
+    }
+
+    .hud {
+      position: absolute;
+      top: 12px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.95rem;
+      font-weight: bold;
+      pointer-events: none;
+      text-shadow: 2px 2px 3px #000;
+      z-index: 10;
+    }
+    #stage-board { color: #00ffff; }
+    #score-board { color: #ffffff; }
+    #life-board { color: #ff3366; }
+
+    .state-overlay {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 85%;
+      background: #000000;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #ff0055;
+      z-index: 20;
+      box-sizing: border-box;
+    }
+    .state-overlay h2 { margin: 0 0 10px 0; font-size: 1.8rem; line-height: 1.4; }
+    .state-overlay p { margin: 5px 0 15px 0; font-size: 1.0rem; color: #ffcc00; line-height: 1.5; }
+    .btn-retry {
+      background: linear-gradient(135deg, #ff0055, #ff5500);
+      border: none;
+      color: #fff;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .info-area {
+      width: 90%;
+      max-width: 460px;
+      margin-top: 20px;
+      box-sizing: border-box;
+    }
+    .instruction-box {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #ccc;
+      background: #222222;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      margin-bottom: 10px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="page-wrapper">
+    
+    <div class="game-title">🚀 SPACE HONGDARS V3.4 最後の死闘 🐥</div>
+    
+    <div class="game-container">
+      <div class="hud">
+        <div id="stage-board">BOSS: <span id="stage">1/3</span></div>
+        <div id="score-board">SCORE: <span id="score">0</span></div>
+        <div id="life-board">LIFE: <span id="life">❤️❤️❤️</span></div>
+      </div>
+
+      <canvas id="gameCanvas"></canvas>
+
+      <div id="status-panel" class="state-overlay hidden">
+        <h2 id="status-title">GAME OVER</h2>
+        <p id="status-msg"></p>
+        <div id="status-score" style="margin: 10px 0; font-size: 1.4rem; font-weight: bold;"></div>
+        <button class="btn-retry" id="btn-retry">RETRY</button>
+      </div>
+    </div>
+
+    <div class="info-area">
+      <div class="instruction-box">
+        【V3.4 アップデート内容】<br>
+        🛸 UFOが再登場！ボス戦中にランダムで飛来し、倒すとボーナススコア(+150)獲得！<br>
+        📱 2STAGE：警告（⚠️）の爆発弾がしっかり「下方向（3方向拡散）」に飛ぶようバグ修正！<br>
+        ⏱️ 2STAGE：⚠️が画面から消えると、ランダムな短い間隔ですぐに次が降ってくる超連戦仕様に！<br>
+        👑 ボスに弾が当たると低確率（約3.5%）でパワーアップの王冠（👑）がドロップ！
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    
+    const scoreEl = document.getElementById("score");
+    const stageEl = document.getElementById("stage");
+    const lifeEl = document.getElementById("life");
+    const stageBoardEl = document.getElementById("stage-board");
+    
+    const statusPanel = document.getElementById("status-panel");
+    const statusTitle = document.getElementById("status-title");
+    const statusMsg = document.getElementById("status-msg");
+    const statusScore = document.getElementById("status-score");
+    const btnRetry = document.getElementById("btn-retry");
+
+    let audioCtx = null;
+
+    let score = 0;
+    let stage = 1; 
+    let lives = 3; 
+    let gameOver = false;
+    let gameClear = false;
+    
+    let invulnerableTimer = 0; 
+    let autoFireTimer = 0; 
+
+    let isLayoutInitialized = false;
+    const player = { x: 220, y: 500, width: 36, height: 36, speed: 7.5, mode: 'single' };
+    let deadLineY = 450; 
+
+    let bullets = [];
+    let enemyBullets = [];
+    let particles = [];
+    let stars = [];
+    let powerups = []; 
+    let boss = null; 
+    let ufo = null;
+
+    // ⚠️爆弾の連射管理用カウンター（1個終わったらランダム間隔で次を落とすため）
+    let nextWarningTimer = 0;
+
+    let isPointerDown = false;
+
+    function updateLifeDisplay() {
+      lifeEl.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+    }
+
+    function syncLayout() {
+      const container = document.querySelector('.game-container');
+      const w = container.clientWidth || 480;
+      const h = container.clientHeight || 500;
+      
+      canvas.width = w;
+      canvas.height = h;
+
+      if (!isLayoutInitialized || gameOver || gameClear) {
+        player.x = w / 2 - player.width / 2;
+        isLayoutInitialized = true;
+      }
+
+      player.y = h - 60;
+      deadLineY = h - 80;
+
+      if (player.x < 0) player.x = 0;
+      if (player.x > w - player.width) player.x = w - player.width;
+    }
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(freq, type, dur) {
+      if (!audioCtx) return;
+      try {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.type = type;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    function updateStageDisplay() {
+      if (stage === 1) stageBoardEl.innerHTML = "BOSS: <span style='color:#ff9900;'>1/3 🐜</span>";
+      if (stage === 2) stageBoardEl.innerHTML = "BOSS: <span style='color:#00ffff;'>2/3 📱</span>";
+      if (stage === 3) {
+        if(boss && boss.form === 'ika') {
+          stageBoardEl.innerHTML = "BOSS: <span style='color:#ff00ff; font-weight:bold;'>FINAL 🦑(暴走)</span>";
+        } else {
+          stageBoardEl.innerHTML = "BOSS: <span style='color:#ff00ff; font-weight:bold;'>FINAL 🐙</span>";
+        }
+      }
+    }
+
+    function initLevel() {
+      bullets = [];
+      enemyBullets = [];
+      powerups = [];
+      invulnerableTimer = 0; 
+      nextWarningTimer = 20; // 最初の爆弾が落ちてくるまでの時間
+      ufo = null; // ステージ切替時に前のUFOを消す
+
+      let bossHp = 25;
+      let bossWidth = 70;
+      let bossHeight = 40;
+      let bossColor = "#ff9900";
+
+      if (stage === 2) {
+        bossHp = 45;
+        bossWidth = 60;
+        bossHeight = 50;
+        bossColor = "#00ffff";
+      } else if (stage === 3) {
+        bossHp = 75; 
+        bossWidth = 80;
+        bossHeight = 50;
+        bossColor = "#ff00ff";
+      }
+
+      boss = {
+        x: canvas.width / 2 - bossWidth / 2,
+        y: 90, 
+        width: bossWidth,
+        height: bossHeight,
+        hp: bossHp, 
+        maxHp: bossHp,
+        vx: 2.2 + (stage * 0.3), 
+        vy: 0,
+        color: bossColor,
+        hitFlash: 0,
+        shootTimer: 0,
+        specialTimer: 0,
+        form: 'tako' 
+      };
+      updateStageDisplay();
+    }
+
+    // 星背景初期化
+    stars = [];
+    for(let i=0; i<60; i++) {
+      let brightness = Math.floor(Math.random() * 150) + 50; 
+      let hex = brightness.toString(16).padStart(2, '0');
+      stars.push({ 
+        x: Math.random() * 480, 
+        y: Math.random() * 600, 
+        speed: Math.random() * 2.3 + 0.6,
+        color: `#${hex}${hex}${hex}`
+      });
+    }
+
+    function handlePointer(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const touchX = clientX - rect.left;
+      let targetX = touchX - player.width / 2;
+      
+      if (targetX < 0) targetX = 0;
+      if (targetX > canvas.width - player.width) targetX = canvas.width - player.width;
+      
+      player.x = targetX;
+    }
+
+    canvas.addEventListener("touchstart", (e) => {
+      if (gameOver || gameClear) return;
+      initAudio();
+      isPointerDown = true;
+      if(e.touches && e.touches[0]) handlePointer(e.touches[0].clientX);
+    }, { passive: true });
+
+    canvas.addEventListener("touchmove", (e) => {
+      if (isPointerDown && !gameOver && !gameClear) {
+        if(e.touches && e.touches[0]) handlePointer(e.touches[0].clientX);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener("touchend", () => isPointerDown = false);
+    canvas.addEventListener("touchcancel", () => isPointerDown = false);
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (gameOver || gameClear) return;
+      initAudio();
+      isPointerDown = true;
+      handlePointer(e.clientX);
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (isPointerDown && !gameOver && !gameClear) handlePointer(e.clientX);
+    });
+    window.addEventListener("mouseup", () => isPointerDown = false);
+
+    let rightPressed = false;
+    let leftPressed = false;
+    document.addEventListener("keydown", (e) => {
+      initAudio();
+      if (e.key === "ArrowRight") { rightPressed = true; isPointerDown = true; }
+      if (e.key === "ArrowLeft") { leftPressed = true; isPointerDown = true; }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowRight") { rightPressed = false; if(!leftPressed) isPointerDown = false; }
+      if (e.key === "ArrowLeft") { leftPressed = false; if(!rightPressed) isPointerDown = false; }
+    });
+
+    function checkAutoFire() {
+      if (!isPointerDown || gameOver || gameClear) return;
+      autoFireTimer++;
+      if (autoFireTimer >= 6) { 
+        autoFireTimer = 0;
+        fireBullet();
+      }
+    }
+
+    function fireBullet() {
+      if (player.mode === 'wide') {
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: -1.6, color: "#ff00ff" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 0, color: "#ff00ff" });
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 1.6, color: "#ff00ff" });
+      } else {
+        bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 11, speed: 9.5, vx: 0, color: "#ffff00" });
+      }
+      playSound(360, 'square', 0.04);
+    }
+
+    function triggerGameOver(message = "") {
+      gameOver = true;
+      isPointerDown = false;
+      playSound(80, 'sawtooth', 0.7);
+      statusTitle.textContent = "GAME OVER";
+      statusTitle.style.color = "#ff3333";
+      statusMsg.textContent = message;
+      statusScore.textContent = "SCORE: " + score;
+      statusPanel.classList.remove("hidden");
+    }
+
+    function playerHit() {
+      if (invulnerableTimer > 0) return; 
+      lives--;
+      player.mode = 'single'; 
+      updateLifeDisplay();
+
+      if (lives <= 0) {
+        triggerGameOver("ひよこのライフが尽きてしまった...");
+      } else {
+        invulnerableTimer = 90; 
+        playSound(160, 'sine', 0.25);
+        for(let k=0; k<15; k++) {
+          particles.push({ x: player.x + 18, y: player.y + 18, vx: (Math.random()-0.5)*7, vy: (Math.random()-0.5)*7, life: 25, color: "#ff3366" });
+        }
+      }
+    }
+
+    function resetGame() {
+      score = 0;
+      stage = 1;
+      lives = 3;
+      gameOver = false;
+      gameClear = false;
+      bullets = [];
+      enemyBullets = [];
+      particles = [];
+      powerups = [];
+      player.mode = 'single';
+      isPointerDown = false;
+      invulnerableTimer = 0; 
+      scoreEl.textContent = score;
+      updateLifeDisplay();
+      statusPanel.classList.add("hidden");
+      syncLayout();
+      initLevel();
+    }
+
+    btnRetry.addEventListener("click", (e) => {
+      e.stopPropagation();
+      resetGame();
+    });
+
+    function gameLoop() {
+      ctx.fillStyle = "#000000"; 
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+      stars.forEach(st => {
+        st.y += st.speed;
+        if(st.y > canvas.height) { st.y = 0; st.x = Math.random() * canvas.width; }
+      });
+
+      if (gameOver || gameClear) return;
+      if (invulnerableTimer > 0) invulnerableTimer--;
+
+      // UFO出現＆移動処理
+      if (!ufo && Math.random() < 0.0035) {
+        ufo = { x: -40, y: 38, width: 30, height: 20, speed: canvas.width * 0.007 };
+      }
+      if (ufo) {
+        ufo.x += ufo.speed;
+        if (ufo.x > canvas.width) ufo = null;
+      }
+
+      if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
+      if (leftPressed && player.x > 0) player.x -= player.speed;
+
+      checkAutoFire();
+
+      // 自機弾移動
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i]; b.y -= b.speed; b.x += b.vx;
+        if (b.y < 0 || b.x < 0 || b.x > canvas.width) bullets.splice(i, 1);
+      }
+
+      // ボスロジック
+      if (boss) {
+        if (boss.hitFlash > 0) boss.hitFlash--;
+        
+        // 左右移動
+        boss.x += boss.vx;
+        if (boss.x <= 0 || boss.x >= canvas.width - boss.width) {
+          boss.vx *= -1;
+        }
+
+        // --- STAGE別攻撃パターン ---
+        boss.shootTimer++;
+
+        if (stage === 1) {
+          if (boss.shootTimer > 45) {
+            boss.shootTimer = 0;
+            let bx = boss.x + boss.width / 2;
+            let by = boss.y + boss.height;
+            enemyBullets.push({ x: bx, y: by, speed: 4.0, vx: -1.3, r: 5, type: 'normal' });
+            enemyBullets.push({ x: bx, y: by, speed: 4.5, vx: 0,    r: 5, type: 'normal' });
+            enemyBullets.push({ x: bx, y: by, speed: 4.0, vx: 1.3,  r: 5, type: 'normal' });
+            playSound(180, 'triangle', 0.08);
+          }
+        } 
+
+
+
+
+       // STAGE 2: 巨大スマホ (ビーム ＋ 改良版・連続時爆通知爆弾 ⚠️)
+        else if (stage === 2) {
+          boss.specialTimer++;
+          
+          // ボスが徐々に降りてくるロジック
+          if (boss.specialTimer % 220 === 0) {
+            boss.y += 8;
+            if (boss.y >= deadLineY - 60) boss.y = deadLineY - 60;
+          }
+
+          // 【調整版】3連ビーム攻撃（間隔とスピードを緩和）
+          // shootTimerの50のタイミングで一度だけ3発撃つように変更
+          if (boss.shootTimer === 50) {
+            let bx = boss.x + boss.width / 2;
+            let by = boss.y + boss.height;
+            // 3方向に拡散して発射 (スピードを 7.2 → 5.0 に低下)
+            [-1, 0, 1].forEach(offset => {
+              enemyBullets.push({ 
+                x: bx, 
+                y: by, 
+                speed: 5.0, 
+                vx: offset * 2.5, 
+                r: 4, 
+                type: 'beam' 
+              });
+            });
+            playSound(280, 'sawtooth', 0.1);
+          }
+          // 攻撃間隔のサイクルを少し伸ばしてゆったりにする
+          if (boss.shootTimer > 80) boss.shootTimer = 0;
+
+          // 【調整版】時限爆弾(⚠️)の連発管理
+          let hasActiveWarning = enemyBullets.some(eb => eb.type === 'warning');
+          
+          if (!hasActiveWarning) {
+            nextWarningTimer--;
+            if (nextWarningTimer <= 0) {
+              let bx = boss.x + boss.width / 2;
+              let by = boss.y + boss.height;
+              let targetY = deadLineY - 35 - (Math.random() * 90);
+              
+              enemyBullets.push({ 
+                x: bx, 
+                y: by, 
+                speed: 4.5, 
+                vx: (Math.random() - 0.5) * 4, 
+                r: 8, 
+                type: 'warning', 
+                targetY: targetY, 
+                state: 'drop', 
+                timer: 0 
+              });
+              playSound(210, 'square', 0.06);
+
+              // 警告弾の間隔を広げる (10〜60 → 50〜100 に変更)
+              nextWarningTimer = Math.floor(Math.random() * 50) + 50;
+            }
+          }
+        }
+
+
+
+
+
+
+        else if (stage === 3) {
+          // STAGE 3: 巨大タコ -> イカ変身暴走
+          if (boss.form === 'tako' && boss.hp <= boss.maxHp / 2) {
+            boss.form = 'ika';
+            boss.color = "#ff00a0";
+            boss.vx = (boss.vx > 0 ? 1 : -1) * 3.8;
+            playSound(400, 'sawtooth', 0.5);
+            updateStageDisplay();
+          }
+
+          let attackInterval = boss.form === 'ika' ? 38 : 65;
+
+          if (boss.shootTimer > attackInterval) {
+            boss.shootTimer = 0;
+            let bx = boss.x + boss.width / 2;
+            let by = boss.y + boss.height / 2;
+            
+            // 8方向拡散スミ弾
+            let numAngles = 8;
+            let bSpeed = boss.form === 'ika' ? 4.2 : 3.3; 
+            for(let a=0; a<numAngles; a++) {
+              let angle = (Math.PI * 2 / numAngles) * a;
+              enemyBullets.push({ 
+                x: bx, 
+                y: by, 
+                speed: Math.sin(angle) * bSpeed, 
+                vx: Math.cos(angle) * bSpeed, 
+                r: 5.5, 
+                type: 'normal' 
+              });
+            }
+
+            // 自機狙い弾
+            let dx = (player.x + player.width/2) - bx;
+            let dy = player.y - by;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if(dist > 0) {
+              let targetSpeed = boss.form === 'ika' ? 5.8 : 4.5;
+              enemyBullets.push({ x: bx, y: by, speed: (dy/dist)*targetSpeed, vx: (dx/dist)*targetSpeed, r: 5, type: 'normal' });
+            }
+            playSound(150, 'sine', 0.12);
+          }
+        }
+
+        if (boss.y + boss.height >= deadLineY) {
+          triggerGameOver("ボスに防衛線を突破された！");
+          return;
+        }
+      }
+
+      // UFOの攻撃(自機狙い)
+      if (ufo && Math.random() < 0.015) {
+        let ufoCenterX = ufo.x + ufo.width / 2;
+        let ufoCenterY = ufo.y + ufo.height;
+        let dx = (player.x + player.width / 2) - ufoCenterX;
+        let dy = player.y - ufoCenterY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        let bulletSpeed = 4.2;
+        enemyBullets.push({ 
+          x: ufoCenterX, 
+          y: ufoCenterY, 
+          speed: (dy / distance) * bulletSpeed, 
+          vx: (dx / distance) * bulletSpeed, 
+          r: 4.5, 
+          type: 'normal' 
+        });
+      }
+
+      // 敵弾・お邪魔ギミックの移動＆ロジック
+      for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        let eb = enemyBullets[i]; 
+        
+        if (eb.type === 'warning') {
+          if (eb.state === 'drop') {
+            eb.y += eb.speed;
+            if (eb.vx) eb.x += eb.vx;
+            // 目標の高さに到達したら待機状態へ
+            if (eb.y >= eb.targetY) {
+              eb.y = eb.targetY;
+              eb.state = 'standby';
+              eb.timer = 50; // 点滅待機時間（少し短くしてシャープに）
+            }
+          } 
+          else if (eb.state === 'standby') {
+            eb.timer--;
+            if (eb.timer <= 0) {
+              eb.state = 'explode';
+            }
+          }
+
+          // 【バグ修正】爆発の瞬間：横ではなく、プレイヤー（下）に向かって3方向拡散
+          if (eb.state === 'explode') {
+            // 真下、左斜め下、右斜め下の3方向に弾を撃ち出す
+            enemyBullets.push({ x: eb.x, y: eb.y, speed: 4.8, vx: 0,    r: 5, type: 'normal' });
+            enemyBullets.push({ x: eb.x, y: eb.y, speed: 4.3, vx: -1.5, r: 5, type: 'normal' });
+            enemyBullets.push({ x: eb.x, y: eb.y, speed: 4.3, vx: 1.5,  r: 5, type: 'normal' });
+            
+            // 爆発エフェクト
+            for(let k=0; k<10; k++) {
+              particles.push({ x: eb.x, y: eb.y, vx: (Math.random()-0.5)*7, vy: (Math.random()-0.5)*7, life: 15, color: "#ff9900" });
+            }
+            playSound(130, 'triangle', 0.15);
+            enemyBullets.splice(i, 1);
+            continue;
+          }
+        } else {
+          // 通常の弾やビームの移動
+          eb.y += eb.speed;
+          if (eb.vx) eb.x += eb.vx;
+        }
+
+        // 画面外判定
+        if (eb.y > canvas.height || eb.x < -30 || eb.x > canvas.width + 30) { 
+          enemyBullets.splice(i, 1); 
+          continue; 
+        }
+
+        // プレイヤーへの当たり判定
+        if (eb.x + eb.r > player.x + 3 && eb.x - eb.r < player.x + player.width - 3 && 
+            eb.y + eb.r > player.y + 3 && eb.y - eb.r < player.y + player.height - 3) {
+          enemyBullets.splice(i, 1); 
+          playerHit();
+        }
+      }
+
+      // 王冠(👑)の移動と獲得
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        let p = powerups[i]; p.y += 2.0;
+        if(p.y > canvas.height) {
+          powerups.splice(i, 1);
+        } else if(p.x > player.x && p.x < player.x + player.width && 
+                  p.y > player.y && p.y < player.y + player.height) {
+          player.mode = 'wide'; 
+          powerups.splice(i, 1);
+          playSound(750, 'sine', 0.22); 
+        }
+      }
+
+      // パーティクル処理
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--; if(p.life <= 0) particles.splice(i, 1);
+      }
+
+      // 自機弾とボス・UFOの衝突判定
+      for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
+        let b = bullets[bIdx]; 
+        
+        if (boss && b.x > boss.x && b.x < boss.x + boss.width && b.y > boss.y && b.y < boss.y + boss.height) {
+          bullets.splice(bIdx, 1);
+          boss.hp--;
+          boss.hitFlash = 4;
+          score += 20;
+          scoreEl.textContent = score;
+          playSound(240, 'triangle', 0.04);
+
+          // ヒット時：約3.5%の確率でその場に王冠を生成
+          if (Math.random() < 0.035) {
+            powerups.push({ x: b.x, y: boss.y + boss.height });
+          }
+
+          for(let k=0; k<4; k++) {
+            particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 12, color: "#ffff00" });
+          }
+
+          // ボス撃破処理
+          if (boss.hp <= 0) {
+            playSound(600, 'sine', 0.6);
+            
+            for(let k=0; k<25; k++) {
+              particles.push({ 
+                x: boss.x + boss.width/2, 
+                y: boss.y + boss.height/2, 
+                vx: (Math.random()-0.5)*10, 
+                vy: (Math.random()-0.5)*10, 
+                life: 30, 
+                color: boss.color 
+              });
+            }
+
+            powerups.push({ x: boss.x + boss.width / 2, y: boss.y + boss.height });
+
+            if (stage < 3) {
+              stage++;
+              score += 1000;
+              scoreEl.textContent = score;
+              if (lives < 3) lives++;
+              updateLifeDisplay();
+              initLevel();
+            } else {
+              gameClear = true;
+              score += 5000; 
+              scoreEl.textContent = score;
+              playSound(880, 'sine', 1.2);
+              statusTitle.textContent = "🏆 ALL CLEAR 🏆";
+              statusTitle.style.color = "#00ffff";
+              statusMsg.textContent = "ひよこ隊員🐥はすべての巨大脅威を退け、宇宙に平和を取り戻した！";
+              statusScore.textContent = "FINAL SCORE: " + score;
+              statusPanel.classList.remove("hidden");
+            }
+          }
+          break;
+        }
+        else if (ufo && b.x > ufo.x && b.x < ufo.x + ufo.width && b.y > ufo.y && b.y < ufo.y + ufo.height) {
+          ufo = null;
+          bullets.splice(bIdx, 1);
+          score += 150;
+          scoreEl.textContent = score;
+          playSound(500, 'sine', 0.18);
+          for(let k=0; k<10; k++) {
+            particles.push({ x: b.x, y: b.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: "#00ffff" });
+          }
+          break;
+        }
+      }
+    }
+
+    function draw() {
+      // 背景の星
+      stars.forEach(st => {
+        ctx.fillStyle = st.color; 
+        ctx.fillRect(st.x, st.y, st.speed * 0.8, st.speed * 0.8);
+      });
+
+      // 防衛ライン
+      ctx.strokeStyle = "#006666"; 
+      ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]); ctx.beginPath();
+      ctx.moveTo(0, deadLineY); ctx.lineTo(canvas.width, deadLineY); ctx.stroke(); ctx.setLineDash([]); 
+
+      // プレイヤー
+      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 8) % 2 === 0) {
+        ctx.font = "34px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("🐥", player.x + player.width/2, player.y + player.height/2 + 2);
+      }
+
+      // 自機弾
+      bullets.forEach(b => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, b.y, b.width, b.height);
+      });
+
+      // 敵弾・トラップ
+      enemyBullets.forEach(eb => {
+        if (eb.type === 'beam') {
+          ctx.fillStyle = "#00ffff";
+          ctx.fillRect(eb.x - 3, eb.y - 12, 6, 24);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(eb.x - 1, eb.y - 10, 2, 20);
+        } 
+        else if (eb.type === 'warning') {
+          // スタンバイ中の爆発直前、赤く激しく点滅させる
+          if (eb.state === 'standby' && eb.timer < 25 && Math.floor(eb.timer / 3) % 2 === 0) {
+            ctx.fillStyle = "#ff0033";
+            ctx.beginPath(); ctx.arc(eb.x, eb.y, 14, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText("⚠️", eb.x, eb.y);
+        } 
+        else {
+          ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
+          ctx.fillStyle = "#ff0033"; ctx.fill();
+          ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1; ctx.stroke(); 
+        }
+      });
+
+      // 王冠
+      ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      powerups.forEach(p => { ctx.fillText("👑", p.x, p.y); });
+
+      // UFO
+      if (ufo) ctx.fillText("🛸", ufo.x + ufo.width / 2, ufo.y);
+
+      // パーティクル
+      particles.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); });
+
+      // ボス
+      if (boss) {
+        if (!(boss.hitFlash > 0 && Math.floor(boss.hitFlash / 2) % 2 === 0)) {
+          ctx.font = stage === 3 ? "62px sans-serif" : "52px sans-serif"; 
+          let bossEmoji = "🐜";
+          if (stage === 2) bossEmoji = "📱";
+          if (stage === 3) {
+            bossEmoji = (boss.form === 'ika') ? "🦑" : "🐙";
+          }
+          ctx.fillText(bossEmoji, boss.x + boss.width / 2, boss.y + boss.height / 2);
+        }
+
+        // HPゲージ
+        let gaugeW = 160;
+        let gaugeH = 9;
+        let gx = (canvas.width - gaugeW) / 2 + 35; 
+        let gy = 40; 
+        
+        ctx.font = "bold 11px 'Courier New', sans-serif";
+        ctx.fillStyle = boss.color;
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        
+        let label = "BOSS HP ";
+        if(stage === 3 && boss.form === 'ika') label = "怒イカ HP ";
+        ctx.fillText(label, gx - 5, gy + gaugeH / 2);
+
+        ctx.fillStyle = "#222222";
+        ctx.fillRect(gx, gy, gaugeW, gaugeH);
+        
+        let currentW = (boss.hp / boss.maxHp) * gaugeW;
+        ctx.fillStyle = boss.color; 
+        ctx.fillRect(gx, gy, currentW, gaugeH);
+        
+        ctx.strokeStyle = "#ffffff"; 
+        ctx.lineWidth = 1; 
+        ctx.strokeRect(gx, gy, gaugeW, gaugeH);
+      }
+    }
+
+    window.addEventListener("resize", syncLayout);
+    
+    window.onload = function() {
+      syncLayout();
+      initLevel();
+      updateLifeDisplay(); 
+      gameLoop(); 
+    };
+  </script>
+</body>
+</html>
